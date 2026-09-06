@@ -1,4 +1,5 @@
 import { WebProject } from '../types';
+import { SEED_FOR_SHEET } from '../data/seedForSheet';
 
 export const STORAGE_KEY_APPSCRIPT_URL = 'webhub_google_appscript_url';
 export const STORAGE_KEY_LAST_SYNC = 'webhub_google_last_sync';
@@ -450,6 +451,9 @@ export const GOOGLE_APPS_SCRIPT_CODE = `/**
  *    - Người có quyền truy cập: "Bất kỳ ai" (Anyone) -> RẤT QUAN TRỌNG ĐỂ TRUY XUẤT ĐƯỢC!
  * 5. Bấm "Triển khai" (Deploy), cấp quyền và sao chép "URL ứng dụng web" (Web App URL)
  *    (có dạng: https://script.google.com/macros/s/.../exec) dán vào ô trên website!
+ *
+ * 6. MUỐN NẠP SẴN 17 MÔ PHỎNG NỔI TIẾNG VÀO SHEET: chọn hàm seedFamousData
+ *    trong dropdown rồi bấm "Run" (Chạy) 1 lần duy nhất!
  */
 
 const MAIN_SHEET = "WebHub_Projects";
@@ -586,6 +590,25 @@ function deleteRowsById(sheet, ids) {
     }
   }
   return removed;
+}
+
+// Dữ liệu nạp sẵn: 17 mô phỏng nổi tiếng quốc tế (đồng bộ từ INITIAL_PROJECTS của website).
+const SEED_FOR_SHEET = ${JSON.stringify(SEED_FOR_SHEET, null, 1)};
+
+// Chạy THỦ CÔNG 1 lần duy nhất (Run ▸ chọn hàm seedFamousData) để:
+//   - Tạo tab WebHub_Projects (nếu chưa có)
+//   - Ghi thẳng 17 mô phỏng nổi tiếng vào sheet (không qua POST nên chữ Unicode chuẩn 100%)
+function seedFamousData() {
+  const sheet = ensureSheet(MAIN_SHEET);
+  const lastRow = sheet.getLastRow();
+  if (lastRow > 1) {
+    sheet.deleteRows(2, lastRow - 1);
+  }
+  if (SEED_FOR_SHEET.length > 0) {
+    sheet.getRange(2, 1, SEED_FOR_SHEET.length, HEADERS.length)
+      .setValues(SEED_FOR_SHEET.map(projectToRow));
+  }
+  return SEED_FOR_SHEET.length;
 }
 
 // Đọc dữ liệu theo GET - hỗ trợ 2 loại:

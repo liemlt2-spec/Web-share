@@ -1,0 +1,6 @@
+{
+  "name": "WebHub Showcase",
+  "description": "Nền tảng chia sẻ website và mô phỏng giáo dục trực tuyến với mã QR, chế độ xem rút gọn và phân loại mô phỏng nổi tiếng.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

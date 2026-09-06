@@ -42,7 +42,25 @@ export interface WebProject {
   isFamous?: boolean; // Website mô phỏng nổi tiếng (PhET, GeoGebra, NetSim...)
 }
 
-export type Language = 'vi' | 'en' | 'ja' | 'fr';
+export const LANGUAGE_CODES = [
+  'vi',
+  'en',
+  'th',
+  'my',
+  'lo',
+  'km',
+  'id',
+  'ms',
+  'tl',
+  'tet',
+] as const;
+
+/**
+ * Ngôn ngữ được hỗ trợ: Tiếng Anh + ngôn ngữ của 11 nước Đông Nam Á
+ * (Việt Nam, Singapore – English, Thái Lan, Myanmar, Lào, Campuchia,
+ *  Indonesia, Malaysia, Brunei – Melayu, Philippines, Đông Timor – Tetun)
+ */
+export type Language = (typeof LANGUAGE_CODES)[number];
 
 export type ViewMode = 'compact' | 'expanded';
 

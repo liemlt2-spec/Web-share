@@ -27,8 +27,14 @@ interface HeaderProps {
 const languages: { code: Language; name: string; flag: string }[] = [
   { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' },
   { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'ja', name: '日本語', flag: '🇯🇵' },
-  { code: 'fr', name: 'Français', flag: '🇫🇷' },
+  { code: 'th', name: 'ไทย', flag: '🇹🇭' },
+  { code: 'my', name: 'မြန်မာ', flag: '🇲🇲' },
+  { code: 'lo', name: 'ລາວ', flag: '🇱🇦' },
+  { code: 'km', name: 'ខ្មែរ', flag: '🇰🇭' },
+  { code: 'id', name: 'Bahasa Indonesia', flag: '🇮🇩' },
+  { code: 'ms', name: 'Bahasa Melayu', flag: '🇲🇾' },
+  { code: 'tl', name: 'Filipino', flag: '🇵🇭' },
+  { code: 'tet', name: 'Tetun', flag: '🇹🇱' },
 ];
 
 export const Header: React.FC<HeaderProps> = ({

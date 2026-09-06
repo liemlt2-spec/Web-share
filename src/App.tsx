@@ -7,6 +7,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   FilterState,
   Language,
+  LANGUAGE_CODES,
   ViewMode,
   WebProject,
 } from './types';
@@ -95,7 +96,8 @@ export default function App() {
   // 1. Language state
   const [lang, setLang] = useState<Language>(() => {
     const saved = localStorage.getItem(STORAGE_KEY_LANG);
-    return (saved as Language) || 'vi';
+    // Tránh giá trị cũ (ja/fr) không còn được hỗ trợ → quay về tiếng Việt
+    return LANGUAGE_CODES.includes(saved as Language) ? (saved as Language) : 'vi';
   });
 
   const handleLanguageChange = (newLang: Language) => {

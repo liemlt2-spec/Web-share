@@ -61,47 +61,52 @@ export async function generateQrDataUrl(text: string): Promise<string> {
 }
 
 /**
- * Relative time formatter with language support
+ * Relative time formatter with language support (Tiếng Việt + 10 ngôn ngữ)
  */
 export function formatTimeAgo(isoString: string, lang: string = 'vi'): string {
   try {
     const date = new Date(isoString);
     const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffSec = Math.floor(diffMs / 1000);
+    const diffSec = Math.floor((now.getTime() - date.getTime()) / 1000);
     const diffMin = Math.floor(diffSec / 60);
     const diffHour = Math.floor(diffMin / 60);
     const diffDay = Math.floor(diffHour / 24);
 
-    if (diffMin < 1) {
-      if (lang === 'vi') return 'Vừa xong';
-      if (lang === 'ja') return 'たった今';
-      if (lang === 'fr') return 'À l\'instant';
-      return 'Just now';
-    }
+    const REL: Record<string, { now: string; min: string; hour: string; day: string }> = {
+      vi: { now: 'Vừa xong', min: '{n} phút trước', hour: '{n} giờ trước', day: '{n} ngày trước' },
+      en: { now: 'Just now', min: '{n}m ago', hour: '{n}h ago', day: '{n}d ago' },
+      th: { now: 'เมื่อสักครู่', min: '{n} นาทีที่แล้ว', hour: '{n} ชั่วโมงที่แล้ว', day: '{n} วันที่แล้ว' },
+      my: { now: 'ယခုလေးတင်', min: '{n} မိနစ်အကြာ', hour: '{n} နာရီအကြာ', day: '{n} ရက်အကြာ' },
+      lo: { now: 'ຫາກໍ່ເອງ', min: '{n} ນາທີກ່ອນ', hour: '{n} ຊົ່ວໂມງກ່ອນ', day: '{n} ມື້ກ່ອນ' },
+      km: { now: 'ទើបតែឥឡូវ', min: '{n} នាទីមុន', hour: '{n} ម៉ោងមុន', day: '{n} ថ្ងៃមុន' },
+      id: { now: 'Baru saja', min: '{n} menit yang lalu', hour: '{n} jam yang lalu', day: '{n} hari yang lalu' },
+      ms: { now: 'Baru sahaja', min: '{n} minit yang lalu', hour: '{n} jam yang lalu', day: '{n} hari yang lalu' },
+      tl: { now: 'Kakalipas lang', min: '{n} minuto ang nakalipas', hour: '{n} oras ang nakalipas', day: '{n} araw ang nakalipas' },
+      tet: { now: 'Foin daudaun', min: '{n} minutu liubá', hour: '{n} oras liubá', day: '{n} loron liubá' },
+    };
 
-    if (diffHour < 1) {
-      if (lang === 'vi') return `${diffMin} phút trước`;
-      if (lang === 'ja') return `${diffMin}分前`;
-      if (lang === 'fr') return `Il y a ${diffMin} min`;
-      return `${diffMin}m ago`;
-    }
+    const LOCALES: Record<string, string> = {
+      vi: 'vi-VN',
+      en: 'en-US',
+      th: 'th-TH',
+      my: 'my-MM',
+      lo: 'lo-LA',
+      km: 'km-KH',
+      id: 'id-ID',
+      ms: 'ms-MY',
+      tl: 'fil-PH',
+      tet: 'tet-TL',
+    };
 
-    if (diffDay < 1) {
-      if (lang === 'vi') return `${diffHour} giờ trước`;
-      if (lang === 'ja') return `${diffHour}時間前`;
-      if (lang === 'fr') return `Il y a ${diffHour} h`;
-      return `${diffHour}h ago`;
-    }
+    const fmt = REL[lang] || REL.en;
+    const fill = (tpl: string, n: number) => tpl.replace('{n}', String(n));
 
-    if (diffDay < 30) {
-      if (lang === 'vi') return `${diffDay} ngày trước`;
-      if (lang === 'ja') return `${diffDay}日前`;
-      if (lang === 'fr') return `Il y a ${diffDay} j`;
-      return `${diffDay}d ago`;
-    }
+    if (diffMin < 1) return fmt.now;
+    if (diffHour < 1) return fill(fmt.min, diffMin);
+    if (diffDay < 1) return fill(fmt.hour, diffHour);
+    if (diffDay < 30) return fill(fmt.day, diffDay);
 
-    return date.toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'en-US', {
+    return date.toLocaleDateString(LOCALES[lang] || 'en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',

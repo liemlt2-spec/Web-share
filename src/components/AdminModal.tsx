@@ -10,7 +10,6 @@ import {
   ExternalLink,
   FileSpreadsheet,
   Globe2,
-  KeyRound,
   Lock,
   RefreshCw,
   RotateCcw,
@@ -74,8 +73,6 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [adminId, setAdminId] = useState(() => {
     return localStorage.getItem('webhub_admin_id') || 'admin';
   });
-  const [password, setPassword] = useState('');
-  const [authError, setAuthError] = useState(false);
 
   // Tabs
   const [activeTab, setActiveTab] = useState<'pending' | 'all' | 'google_sync' | 'backup'>('pending');
@@ -100,24 +97,12 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Handle Admin Login with ID and Password (Password: 1122@)
+  // Handle Admin Login (chỉ cần ID Quản trị viên, không yêu cầu mật khẩu)
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     const cleanId = adminId.trim();
-    const cleanPass = password.trim();
-
-    // Password must be 1122@ (also allow admin123 as secondary fallback)
-    const isPasswordValid = cleanPass === '1122@' || cleanPass === 'admin123';
-    const isIdValid = cleanId.length > 0;
-
-    if (isPasswordValid && isIdValid) {
-      setIsAdmin(true);
-      setAuthError(false);
-      setPassword('');
-      localStorage.setItem('webhub_admin_id', cleanId);
-    } else {
-      setAuthError(true);
-    }
+    setIsAdmin(true);
+    localStorage.setItem('webhub_admin_id', cleanId || 'admin');
   };
 
   const handleLogout = () => {
@@ -274,7 +259,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
               <p className="text-[11px] text-slate-400">
                 {isAdmin
                   ? 'Toàn quyền kiểm duyệt, phân loại và kết nối đồng bộ Google Sheets / Drive'
-                  : 'Đăng nhập với ID và Mật khẩu 1122@ để quản lý hệ thống'}
+                  : 'Nhập ID Quản trị viên để truy cập bảng điều khiển'}
               </p>
             </div>
           </div>
@@ -287,7 +272,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
           </button>
         </div>
 
-        {/* If NOT logged in: Show ID & Password Form */}
+        {/* If NOT logged in: Show Admin ID Form */}
         {!isAdmin ? (
           <div className="p-8 flex flex-col items-center justify-center text-center max-w-md mx-auto w-full">
             <div className="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4">
@@ -295,7 +280,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
             </div>
             <h4 className="font-bold text-base text-slate-900 mb-1">{t.loginAdmin}</h4>
             <p className="text-xs text-slate-500 mb-5 leading-relaxed">
-              Xác thực danh tính Quản trị viên để kiểm duyệt bài viết và cấu hình đồng bộ Google Cloud.
+              Nhập ID Quản trị viên để kiểm duyệt bài viết và cấu hình đồng bộ Google Cloud.
             </p>
 
             <form onSubmit={handleLogin} className="w-full space-y-3.5 text-left">
@@ -309,38 +294,10 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                   id="admin-id-input"
                   type="text"
                   value={adminId}
-                  onChange={(e) => {
-                    setAdminId(e.target.value);
-                    setAuthError(false);
-                  }}
+                  onChange={(e) => setAdminId(e.target.value)}
                   placeholder={t.adminIdPlaceholder}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                 />
-              </div>
-
-              {/* Password Input (Password: 1122@) */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center space-x-1.5">
-                  <KeyRound className="w-3.5 h-3.5 text-slate-400" />
-                  <span>{t.adminPasswordLabel}</span>
-                </label>
-                <input
-                  id="admin-passcode-input"
-                  type="password"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    setAuthError(false);
-                  }}
-                  placeholder={t.adminPasswordPlaceholder}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-800 tracking-widest focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                />
-                {authError && (
-                  <p className="mt-1.5 text-[11px] text-rose-600 font-medium flex items-center space-x-1">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>{t.adminWrongPassword}</span>
-                  </p>
-                )}
               </div>
 
               <button
@@ -352,17 +309,6 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                 <span>Mở Quyền Quản Trị Viên</span>
               </button>
             </form>
-
-            <div className="mt-5 p-3 bg-amber-50 border border-amber-200/70 rounded-xl text-[11px] text-amber-900 text-left w-full space-y-1">
-              <div className="font-bold flex items-center space-x-1">
-                <span>🔑</span>
-                <span>Thông tin quản trị viên mặc định:</span>
-              </div>
-              <div className="font-mono text-slate-700 space-y-0.5 pl-1">
-                <div>• ID: <strong className="text-indigo-700">admin</strong> (hoặc email của bạn)</div>
-                <div>• Mật khẩu: <strong className="text-rose-600 bg-rose-50 px-1 py-0.5 rounded border border-rose-200">1122@</strong></div>
-              </div>
-            </div>
           </div>
         ) : (
           /* Logged In View */

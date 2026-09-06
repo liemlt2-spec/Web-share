@@ -38,6 +38,18 @@ const STORAGE_KEY_ADMIN = 'webhub_admin_session';
 
 // Helper to ensure famous platforms and community submissions are cleanly separated
 const sanitizeAndMigrateProjects = (loadedList: WebProject[]): WebProject[] => {
+  // Các dữ liệu mẫu cũ đã được gỡ khỏi bản khởi tạo (demo bài đăng tải, pending, mục ghép cũ)
+  const deprecatedSampleIds = new Set<string>([
+    'proj-phys-1',
+    'proj-chem-1',
+    'proj-math-1',
+    'proj-bio-1',
+    'proj-hist-1',
+    'proj-lit-1',
+    'proj-eng-1',
+    'proj-pending-1',
+  ]);
+
   const famousKeywords = [
     'phet',
     'geogebra',
@@ -53,18 +65,20 @@ const sanitizeAndMigrateProjects = (loadedList: WebProject[]): WebProject[] => {
 
   const initialFamous = INITIAL_PROJECTS.filter((p) => p.isFamous);
 
-  const updated: WebProject[] = loadedList.map((p) => {
-    const isFamousMatch = famousKeywords.some(
-      (kw) =>
-        p.url.toLowerCase().includes(kw) ||
-        p.id.toLowerCase().includes(kw) ||
-        p.title.toLowerCase().includes(kw)
-    );
-    return {
-      ...p,
-      isFamous: isFamousMatch || !!p.isFamous,
-    };
-  });
+  const updated: WebProject[] = loadedList
+    .filter((p) => !deprecatedSampleIds.has(p.id))
+    .map((p) => {
+      const isFamousMatch = famousKeywords.some(
+        (kw) =>
+          p.url.toLowerCase().includes(kw) ||
+          p.id.toLowerCase().includes(kw) ||
+          p.title.toLowerCase().includes(kw)
+      );
+      return {
+        ...p,
+        isFamous: isFamousMatch || !!p.isFamous,
+      };
+    });
 
   // Ensure all standard famous simulations from INITIAL_PROJECTS are included
   for (const fam of initialFamous) {

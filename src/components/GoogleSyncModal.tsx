@@ -324,7 +324,7 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
                   </button>
                 </div>
                 <p className="text-[11px] text-slate-500">
-                  Link này có dạng đuôi kết thúc bằng <strong>/exec</strong> sau khi bạn bấm Triển khai (Deploy) trong Apps Script.
+                  Bạn có thể dán <strong>Web App URL</strong> (đuôi <strong>/exec</strong> là bản chính thức cho mọi người dùng) hoặc dán thẳng <strong>link Google Sheets</strong> — hệ thống sẽ tự động nhận diện và kết nối. Lưu ý: URL đuôi <strong>/dev</strong> chỉ hoạt động khi bạn đang đăng nhập Google để test.
                 </p>
               </div>
 

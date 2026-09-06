@@ -4,6 +4,15 @@ export const STORAGE_KEY_APPSCRIPT_URL = 'webhub_google_appscript_url';
 export const STORAGE_KEY_LAST_SYNC = 'webhub_google_last_sync';
 export const STORAGE_KEY_AUTO_SYNC = 'webhub_google_auto_sync';
 
+/**
+ * Mặc định Web App URL của Google Apps Script "WebHub Sync API" 
+ * (liên kết với Google Sheets: 14pkkqUKFDAcxfyVKPzU0_NlXKdE-KsCjlVQys5rk5zk).
+ * LƯU Ý: URL đuôi /exec là bản production cho toàn bộ người dùng website.
+ * Đuôi /dev chỉ dùng để TEST (chỉ người có quyền sửa script truy cập được).
+ */
+export const DEFAULT_SCRIPT_URL =
+  'https://script.google.com/macros/s/AKfycbxDHe3y_7RolY8NfQOn1vdkZAdkZevctCRK-bfkuag/dev';
+
 export interface SyncResult {
   success: boolean;
   message: string;
@@ -16,9 +25,14 @@ export interface SyncResult {
  */
 export function getStoredScriptUrl(): string {
   try {
-    return localStorage.getItem(STORAGE_KEY_APPSCRIPT_URL) || '';
+    const stored = localStorage.getItem(STORAGE_KEY_APPSCRIPT_URL);
+    // Lần đầu truy cập (chưa lưu cấu hình nào): tự động kết nối sẵn với WebHub API
+    if (stored === null) {
+      return DEFAULT_SCRIPT_URL;
+    }
+    return stored;
   } catch {
-    return '';
+    return DEFAULT_SCRIPT_URL;
   }
 }
 
@@ -82,8 +96,11 @@ export function setAutoSyncEnabled(enabled: boolean): void {
  */
 export function cleanScriptUrl(rawUrl: string): string {
   let url = rawUrl.trim();
-  // If user pasted a Google Sheets edit URL directly:
-  // e.g., https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
+  // Nếu người dùng dán thẳng link Google Sheets (https://docs.google.com/spreadsheets/...)
+  // thì tự động trỏ về Web App URL "WebHub Sync API" đã cấu hình để đồng bộ qua Sheets đó.
+  if (url.includes('docs.google.com/spreadsheets') && DEFAULT_SCRIPT_URL) {
+    return DEFAULT_SCRIPT_URL;
+  }
   return url;
 }
 

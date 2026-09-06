@@ -12,6 +12,9 @@ export interface Translations {
   loginAdmin: string;
   adminIdLabel: string;
   adminIdPlaceholder: string;
+  adminPasswordLabel: string;
+  adminPasswordPlaceholder: string;
+  adminWrongPassword: string;
   googleSyncTab: string;
   googleSyncTitle: string;
   viewDetails: string;
@@ -103,6 +106,9 @@ export const translations: Record<Language, Translations> = {
     loginAdmin: 'Đăng nhập Quản trị',
     adminIdLabel: 'ID Quản trị viên (Tài khoản)',
     adminIdPlaceholder: 'Nhập ID (ví dụ: admin hoặc email)...',
+    adminPasswordLabel: 'Mật khẩu Quản trị viên',
+    adminPasswordPlaceholder: 'Nhập mật khẩu...',
+    adminWrongPassword: 'ID hoặc Mật khẩu chưa đúng.',
     googleSyncTab: 'Đồng bộ Google Sheets',
     googleSyncTitle: 'Đồng bộ hóa dữ liệu Google Apps Script / Drive',
     viewDetails: 'Xem chi tiết',
@@ -230,6 +236,9 @@ export const translations: Record<Language, Translations> = {
     loginAdmin: 'Admin Sign In',
     adminIdLabel: 'Admin ID / Username',
     adminIdPlaceholder: 'Enter admin ID (e.g. admin or email)...',
+    adminPasswordLabel: 'Admin Passcode',
+    adminPasswordPlaceholder: 'Enter passcode...',
+    adminWrongPassword: 'Incorrect ID or password.',
     googleSyncTab: 'Google Sheets Sync',
     googleSyncTitle: 'Google Cloud & Apps Script Synchronization',
     viewDetails: 'View Details',
@@ -357,6 +366,9 @@ export const translations: Record<Language, Translations> = {
     loginAdmin: '管理者ログイン',
     adminIdLabel: '管理者ID / ユーザー名',
     adminIdPlaceholder: '管理者IDを入力 (例: admin)...',
+    adminPasswordLabel: '管理者パスワード',
+    adminPasswordPlaceholder: 'パスワードを入力...',
+    adminWrongPassword: 'IDまたはパスワードが違います。',
     googleSyncTab: 'Googleスプレッドシート同期',
     googleSyncTitle: 'Google Apps Script連携・同期',
     viewDetails: '詳細を見る',
@@ -484,6 +496,9 @@ export const translations: Record<Language, Translations> = {
     loginAdmin: 'Connexion Admin',
     adminIdLabel: 'Identifiant Administrateur',
     adminIdPlaceholder: 'Entrez l\'ID (ex: admin)...',
+    adminPasswordLabel: 'Mot de passe Administrateur',
+    adminPasswordPlaceholder: 'Entrez le mot de passe...',
+    adminWrongPassword: 'Identifiant ou mot de passe incorrect.',
     googleSyncTab: 'Synchro Google Sheets',
     googleSyncTitle: 'Synchronisation Google Apps Script / Drive',
     viewDetails: 'Détails',

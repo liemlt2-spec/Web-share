@@ -51,12 +51,12 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
     onSubmit({
       url: normalizedUrl,
       title: title.trim(),
-      description: description.trim() || 'Website chia sẻ bởi cộng đồng.',
+      description: description.trim() || t.smDefaultDesc,
       country,
       category,
       educationLevel,
       status: 'pending',
-      authorName: authorName.trim() || 'Thành viên cộng đồng',
+      authorName: authorName.trim() || t.smDefaultAuthor,
       authorContact: authorContact.trim(),
       previewImage: customThumbnail.trim() || undefined,
       tags,
@@ -111,7 +111,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
               <h3 className="font-bold text-slate-900 text-base">{t.submitModalTitle}</h3>
               <p className="text-xs text-slate-500">
                 {isAdmin
-                  ? 'Quyền Admin: Bài đăng sẽ vào danh sách chờ duyệt trong bảng điều khiển.'
+                  ? t.smAdminNote
                   : t.submitModalSubtitle}
               </p>
             </div>
@@ -133,7 +133,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
             </div>
             <h3 className="text-xl font-bold text-slate-900">{t.submitSuccess}</h3>
             <p className="text-xs text-slate-600 max-w-md leading-relaxed">
-              Bài mô phỏng đã được gửi đến ban quản trị. Sau khi được duyệt, bài sẽ hiển thị ngay trên trang chủ!
+              {t.smSuccessDesc}
             </p>
           </div>
         ) : (
@@ -154,7 +154,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-mono"
               />
               <p className="mt-1 text-[11px] text-slate-500">
-                Hỗ trợ mọi liên kết Vercel, GitHub Pages, trường học, sản phẩm giáo dục hoặc website riêng.
+                {t.smSubmitUrlHint}
               </p>
             </div>
 
@@ -205,7 +205,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                 >
                   {VN_SUBJECTS.map((subj) => (
                     <option key={subj.id} value={subj.id}>
-                      {subj.name}
+                      {t.categoryNames[subj.id] ?? subj.name}
                     </option>
                   ))}
                 </select>
@@ -265,14 +265,14 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
             {/* Tags */}
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Thẻ từ khóa (Cách nhau bằng dấu phẩy)
+                {t.smTagsLabel}
               </label>
               <input
                 id="input-tags"
                 type="text"
                 value={tagsInput}
                 onChange={(e) => setTagsInput(e.target.value)}
-                placeholder="VD: Toán 3D, Vercel, Mã nguồn mở, THCS"
+                placeholder={t.smTagsPlaceholder}
                 className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-800 focus:outline-none focus:border-indigo-500"
               />
             </div>
@@ -290,12 +290,12 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                   type="url"
                   value={customThumbnail}
                   onChange={(e) => setCustomThumbnail(e.target.value)}
-                  placeholder="https://... dán link ảnh tùy chỉnh (tùy chọn)"
+                  placeholder={t.smThumbnailPlaceholder}
                   className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-800 focus:outline-none focus:border-indigo-500 font-mono"
                 />
                 <label className="cursor-pointer px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 flex items-center space-x-1 shrink-0 transition-colors">
                   <Upload className="w-3.5 h-3.5 text-slate-600" />
-                  <span>Tải ảnh</span>
+                  <span>{t.smUploadImage}</span>
                   <input
                     type="file"
                     accept="image/*"
@@ -315,9 +315,10 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
               <div className="max-w-md mx-auto">
                 <BrowserMockupFrame
                   url={url || 'https://my-app.vercel.app'}
-                  title={title || 'Tiêu đề website của bạn'}
+                  title={title || t.smMockupTitle}
                   previewImage={customThumbnail}
                   aspectRatio="video"
+                  lang={lang}
                 />
               </div>
             </div>

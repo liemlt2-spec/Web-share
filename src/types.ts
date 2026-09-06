@@ -84,6 +84,14 @@ export const VN_SUBJECTS: SubjectOption[] = [
   { id: 'general', name: 'Môn học khác 🎨' },
 ];
 
+export interface LocalizedProjectContent {
+  id: string;
+  title: string;
+  description: string;
+  authorName: string;
+  tags: string[];
+}
+
 export interface FilterState {
   searchQuery: string;
   category: CategoryId | 'ALL';

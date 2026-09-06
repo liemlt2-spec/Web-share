@@ -1,6 +1,25 @@
 import QRCode from 'qrcode';
 
 /**
+ * Maps each supported language code to its BCP 47 locale tag.
+ */
+export function getLocaleCode(lang: string = 'vi'): string {
+  const LOCALES: Record<string, string> = {
+    vi: 'vi-VN',
+    en: 'en-US',
+    th: 'th-TH',
+    my: 'my-MM',
+    lo: 'lo-LA',
+    km: 'km-KH',
+    id: 'id-ID',
+    ms: 'ms-MY',
+    tl: 'fil-PH',
+    tet: 'tet-TL',
+  };
+  return LOCALES[lang] || 'en-US';
+}
+
+/**
  * Returns a high-quality preview thumbnail URL for a given web URL.
  */
 export function getWebsiteScreenshotUrl(rawUrl: string, customThumbnail?: string): string {
@@ -85,19 +104,6 @@ export function formatTimeAgo(isoString: string, lang: string = 'vi'): string {
       tet: { now: 'Foin daudaun', min: '{n} minutu liubá', hour: '{n} oras liubá', day: '{n} loron liubá' },
     };
 
-    const LOCALES: Record<string, string> = {
-      vi: 'vi-VN',
-      en: 'en-US',
-      th: 'th-TH',
-      my: 'my-MM',
-      lo: 'lo-LA',
-      km: 'km-KH',
-      id: 'id-ID',
-      ms: 'ms-MY',
-      tl: 'fil-PH',
-      tet: 'tet-TL',
-    };
-
     const fmt = REL[lang] || REL.en;
     const fill = (tpl: string, n: number) => tpl.replace('{n}', String(n));
 
@@ -106,7 +112,7 @@ export function formatTimeAgo(isoString: string, lang: string = 'vi'): string {
     if (diffDay < 1) return fill(fmt.hour, diffHour);
     if (diffDay < 30) return fill(fmt.day, diffDay);
 
-    return date.toLocaleDateString(LOCALES[lang] || 'en-US', {
+    return date.toLocaleDateString(getLocaleCode(lang), {
       year: 'numeric',
       month: 'short',
       day: 'numeric',

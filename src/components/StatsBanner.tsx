@@ -30,7 +30,7 @@ export const StatsBanner: React.FC<StatsBannerProps> = ({
           <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         </div>
         <span className="font-extrabold text-xs sm:text-base tracking-wide text-white">
-          WebHub
+          {t.appName}
         </span>
       </div>
 
@@ -44,7 +44,7 @@ export const StatsBanner: React.FC<StatsBannerProps> = ({
         <span className="whitespace-nowrap">{t.submitWebsite}</span>
         <span
           className="ml-0.5 sm:ml-1 px-1.5 sm:px-2 py-0.5 rounded-full bg-indigo-950/80 text-indigo-200 text-[10px] sm:text-[11px] font-mono font-medium border border-indigo-400/30 flex items-center space-x-1 shrink-0"
-          title="Lượt xem"
+          title={t.viewsCount.replace('{count}', String(formattedViews))}
         >
           <Eye className="w-3 h-3 text-indigo-300" />
           <span>{formattedViews}</span>

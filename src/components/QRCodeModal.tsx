@@ -96,7 +96,7 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
               />
             ) : (
               <div className="w-56 h-56 flex items-center justify-center bg-slate-100 rounded-lg animate-pulse text-xs text-slate-400">
-                Đang tạo mã QR...
+                {t.qrGenerating}
               </div>
             )}
           </div>

@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import { WebProject, Language } from '../types';
 import { translations } from '../translations';
-import { extractDomain, formatTimeAgo } from '../utils/screenshot';
+import { extractDomain, formatTimeAgo, getLocaleCode } from '../utils/screenshot';
 import {
   getStoredScriptUrl,
   setStoredScriptUrl,
@@ -134,12 +134,12 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     if (clean) {
       setSyncStatusMsg({
         type: 'info',
-        text: 'Đã lưu đường dẫn Google Apps Script vào hệ thống. Bạn có thể bấm "Kiểm tra kết nối" hoặc "Tải dữ liệu".',
+        text: t.gsSavedUrlMsg,
       });
     } else {
       setSyncStatusMsg({
         type: 'info',
-        text: 'Đã xóa cấu hình kết nối Google Apps Script.',
+        text: t.gsClearedMsg,
       });
     }
   };
@@ -155,7 +155,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     if (!scriptUrl.trim()) {
       setSyncStatusMsg({
         type: 'error',
-        text: 'Vui lòng dán đường link Google Apps Script Web App URL trước khi thực hiện.',
+        text: t.gsNeedUrlFirst,
       });
       return;
     }
@@ -191,7 +191,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     if (!scriptUrl.trim()) {
       setSyncStatusMsg({
         type: 'error',
-        text: 'Vui lòng dán đường link Google Apps Script Web App URL trước khi đồng bộ.',
+        text: t.gsPushNeedUrl,
       });
       return;
     }
@@ -234,7 +234,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
             onImportData(parsed);
           }
         } catch {
-          alert('Tệp JSON không hợp lệ.');
+          alert(t.amImportInvalid);
         }
       };
       reader.readAsText(file);
@@ -272,8 +272,8 @@ export const AdminModal: React.FC<AdminModalProps> = ({
               </div>
               <p className="text-[11px] text-slate-400">
                 {isAdmin
-                  ? 'Toàn quyền kiểm duyệt, phân loại và kết nối đồng bộ Google Sheets / Drive'
-                  : 'Đăng nhập bằng ID và mật khẩu quản trị viên để quản lý hệ thống'}
+                  ? t.amHeaderSubLogged
+                  : t.amHeaderSubLogin}
               </p>
             </div>
           </div>
@@ -294,7 +294,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
             </div>
             <h4 className="font-bold text-base text-slate-900 mb-1">{t.loginAdmin}</h4>
             <p className="text-xs text-slate-500 mb-5 leading-relaxed">
-              Nhập ID Quản trị viên để kiểm duyệt bài viết và cấu hình đồng bộ Google Cloud.
+              {t.amLoginPromo}
             </p>
 
             <form onSubmit={handleLogin} className="w-full space-y-3.5 text-left">
@@ -348,7 +348,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                 className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition-colors flex items-center justify-center space-x-1.5 mt-2"
               >
                 <Shield className="w-4 h-4" />
-                <span>Mở Quyền Quản Trị Viên</span>
+                <span>{t.amLoginBtn}</span>
               </button>
             </form>
           </div>
@@ -392,7 +392,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                   }`}
                 >
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Đã duyệt ({approvedList.length})</span>
+                  <span>{t.amTabApproved} ({approvedList.length})</span>
                 </button>
 
                 {/* Tab 3: Google Sheets & Apps Script Sync (Requested) */}
@@ -406,9 +406,9 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                   }`}
                 >
                   <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-500" />
-                  <span>Đồng bộ Google Sheets</span>
+                  <span>{t.googleSyncTab}</span>
                   {scriptUrl ? (
-                    <span className="w-2 h-2 rounded-full bg-emerald-400" title="Đã cấu hình Google Cloud" />
+                    <span className="w-2 h-2 rounded-full bg-emerald-400" title={t.gsConfigured} />
                   ) : null}
                 </button>
 
@@ -423,7 +423,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                   }`}
                 >
                   <Download className="w-3.5 h-3.5" />
-                  <span>Sao lưu JSON</span>
+                  <span>{t.amTabBackup}</span>
                 </button>
               </div>
 
@@ -446,13 +446,13 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                   {pendingList.length === 0 ? (
                     <div className="py-12 text-center text-slate-400">
                       <CheckCircle2 className="w-12 h-12 text-emerald-500/60 mx-auto mb-2" />
-                      <p className="text-xs font-semibold text-slate-600">Không có bài viết nào đang chờ duyệt</p>
-                      <p className="text-[11px] text-slate-400 mt-0.5">Tất cả đề xuất từ cộng đồng đã được xử lý xong!</p>
+                      <p className="text-xs font-semibold text-slate-600">{t.amNoPendingTitle}</p>
+                      <p className="text-[11px] text-slate-400 mt-0.5">{t.amNoPendingDesc}</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
                       <p className="text-xs text-slate-500 mb-2">
-                        Các bài viết dưới đây do người dùng đóng góp. Bạn hãy kiểm tra link và nhấn <strong>Duyệt</strong> để hiển thị công khai trên trang chủ hoặc <strong>Từ chối</strong>.
+                        {t.amPendingHint}
                       </p>
                       {pendingList.map((item) => (
                         <div
@@ -462,7 +462,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                           <div className="space-y-1.5 flex-1 min-w-0">
                             <div className="flex items-center space-x-2 flex-wrap gap-y-1">
                               <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[10px] font-bold">
-                                Chờ duyệt
+                                {t.statusPending}
                               </span>
                               <span className="text-[11px] text-slate-500">
                                 {formatTimeAgo(item.createdAt, lang)}
@@ -480,7 +480,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
                             <div className="flex items-center space-x-3 text-[11px] text-slate-500 pt-1 flex-wrap gap-y-1">
                               <span className="font-mono text-indigo-600 truncate max-w-xs">{item.url}</span>
-                              <span>Tác giả: <strong>{item.authorName}</strong></span>
+                              <span>{t.authorLabelShort} <strong>{item.authorName}</strong></span>
                               {item.authorContact && <span>({item.authorContact})</span>}
                             </div>
                           </div>
@@ -494,7 +494,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                               className="px-3 py-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 text-xs font-semibold flex items-center space-x-1"
                             >
                               <ExternalLink className="w-3.5 h-3.5" />
-                              <span>Mở link</span>
+                              <span>{t.amOpenLink}</span>
                             </a>
 
                             <button
@@ -523,7 +523,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
               {activeTab === 'all' && (
                 <div className="space-y-2.5">
                   <p className="text-xs text-slate-500 mb-2">
-                    Danh sách các website đã được duyệt đang công khai trên trang chủ. Bạn có thể xóa bất kỳ bài nào với chức năng xác nhận an toàn.
+                    {t.amApprovedHint}
                   </p>
                   {approvedList.map((item) => (
                     <div
@@ -536,7 +536,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                           <span className="text-[10px] text-slate-400 font-mono">({extractDomain(item.url)})</span>
                         </div>
                         <p className="text-[11px] text-slate-500 truncate mt-0.5">
-                          {t.categoryNames[item.category]} • {t.countryNames[item.country]} • {t.educationLevelNames[item.educationLevel]} • Lượt xem: {item.views}
+                          {t.categoryNames[item.category]} • {t.countryNames[item.country]} • {t.educationLevelNames[item.educationLevel]} • {t.viewsCount.replace('{count}', String(item.views))}
                         </p>
                       </div>
 
@@ -546,14 +546,14 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                           target="_blank"
                           rel="noopener noreferrer"
                           className="p-1.5 text-slate-400 hover:text-indigo-600 rounded-lg hover:bg-slate-100"
-                          title="Mở website"
+                          title={t.amOpenWebsite}
                         >
                           <ExternalLink className="w-4 h-4" />
                         </a>
                         <button
                           onClick={() => onDeleteRequest(item)}
                           className="p-1.5 text-rose-500 hover:text-rose-700 rounded-lg hover:bg-rose-50"
-                          title="Xác nhận xóa website"
+                          title={t.amDeleteWebsite}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -572,11 +572,11 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       <div className="flex items-center space-x-2">
                         <FileSpreadsheet className="w-5 h-5 text-emerald-600" />
                         <h4 className="text-sm font-bold text-slate-900">
-                          Đồng bộ hóa dữ liệu qua Google Sheets & Apps Script
+                          {t.amSyncTitle}
                         </h4>
                       </div>
                       <p className="text-xs text-slate-600 leading-relaxed max-w-2xl">
-                        Dữ liệu website (cả đã duyệt, chờ duyệt và mockup) sẽ được lưu trữ và kiểm soát tập trung trên file Google Sheets của bạn. Bạn có thể duyệt bài trực tiếp trên Google Sheets hoặc trên website này.
+                        {t.amSyncDesc}
                       </p>
                     </div>
 
@@ -584,11 +584,11 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       {scriptUrl ? (
                         <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center space-x-1.5 border border-emerald-300">
                           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                          <span>Đã liên kết Cloud</span>
+                          <span>{t.amLinkedCloud}</span>
                         </span>
                       ) : (
                         <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
-                          Chưa có URL Apps Script
+                          {t.amNoUrl}
                         </span>
                       )}
                     </div>
@@ -598,7 +598,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                   <div className="p-5 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-4">
                     <div>
                       <label className="block text-xs font-bold text-slate-800 mb-1.5">
-                        Dán đường link Google Apps Script (Web App URL) hoặc link Google Drive:
+                        {t.amUrlLabel}
                       </label>
                       <div className="flex items-center gap-2">
                         <div className="relative flex-1">
@@ -613,7 +613,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                             <button
                               onClick={() => setScriptUrl('')}
                               className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
-                              title="Xóa link"
+                              title={t.amDeleteLink}
                             >
                               ✕
                             </button>
@@ -624,11 +624,11 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                           className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center space-x-1.5 transition-colors shrink-0"
                         >
                           <Save className="w-3.5 h-3.5" />
-                          <span>{isUrlSaved ? 'Đã lưu!' : 'Lưu URL'}</span>
+                          <span>{isUrlSaved ? t.gsSaved : t.gsSaveUrl}</span>
                         </button>
                       </div>
                       <p className="text-[11px] text-slate-500 mt-1">
-                        URL này được tạo khi bạn chọn <strong>Triển khai (Deploy) -&gt; Ứng dụng web (Web App)</strong> trong Google Apps Script của bảng tính.
+                        {t.amUrlNote}
                       </p>
                     </div>
 
@@ -642,7 +642,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                           className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center space-x-1.5 shadow-sm transition-colors disabled:opacity-50"
                         >
                           <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
-                          <span>{isSyncing ? 'Đang đồng bộ...' : 'Tải dữ liệu từ Google Sheets'}</span>
+                          <span>{isSyncing ? t.amSyncing : t.amFetch}</span>
                         </button>
 
                         {/* Push to Sheet */}
@@ -652,7 +652,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                           className="px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center justify-center space-x-1.5 transition-colors disabled:opacity-50"
                         >
                           <Send className="w-3.5 h-3.5 text-indigo-600" />
-                          <span>Đẩy {projects.length} website lên Sheets</span>
+                          <span>{t.amPushCount.replace('{count}', String(projects.length))}</span>
                         </button>
                       </div>
 
@@ -664,7 +664,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                           onChange={(e) => handleToggleAutoSync(e.target.checked)}
                           className="rounded text-emerald-600 focus:ring-emerald-500"
                         />
-                        <span>Tự động đồng bộ khi có bài mới</span>
+                        <span>{t.amAutoSyncNew}</span>
                       </label>
                     </div>
 
@@ -692,7 +692,8 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
                     {lastSync && (
                       <div className="text-[11px] text-slate-400">
-                        Lần đồng bộ gần nhất: <strong>{new Date(lastSync).toLocaleString('vi-VN')}</strong>
+                        {t.amLastSync}
+                        <strong>{new Date(lastSync).toLocaleString(getLocaleCode(lang))}</strong>
                       </div>
                     )}
                   </div>
@@ -703,7 +704,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       <div className="flex items-center space-x-2">
                         <Code2 className="w-4 h-4 text-indigo-600" />
                         <h4 className="text-xs font-bold text-slate-900">
-                          Mã nguồn Google Apps Script (Code.gs) & Hướng dẫn cài đặt
+                          {t.gsCodeTitle}
                         </h4>
                       </div>
 
@@ -718,12 +719,12 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         {isCodeCopied ? (
                           <>
                             <Check className="w-3.5 h-3.5" />
-                            <span>Đã sao chép mã!</span>
+                            <span>{t.gsCodeCopied}</span>
                           </>
                         ) : (
                           <>
                             <Copy className="w-3.5 h-3.5" />
-                            <span>Sao chép mã Google Apps Script</span>
+                            <span>{t.amCopyScript}</span>
                           </>
                         )}
                       </button>
@@ -734,40 +735,40 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       <div className="p-3 bg-white border border-slate-200 rounded-xl space-y-1">
                         <div className="font-bold text-slate-900 flex items-center space-x-1.5">
                           <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-[10px]">1</span>
-                          <span>Tạo file Google Sheets</span>
+                          <span>{t.gsStep1}</span>
                         </div>
                         <p className="text-[11px] text-slate-500">
-                          Mở Google Drive của bạn, bấm <strong>Mới -&gt; Google Trang tính (Sheets)</strong> và đặt tên bất kỳ (VD: WebHub_Database).
+                          {t.gsStep1Desc}
                         </p>
                       </div>
 
                       <div className="p-3 bg-white border border-slate-200 rounded-xl space-y-1">
                         <div className="font-bold text-slate-900 flex items-center space-x-1.5">
                           <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-[10px]">2</span>
-                          <span>Mở Apps Script & Dán mã</span>
+                          <span>{t.gsStep2}</span>
                         </div>
                         <p className="text-[11px] text-slate-500">
-                          Trong Google Sheet, chọn menu <strong>Tiện ích mở rộng (Extensions) -&gt; Apps Script</strong>. Dán toàn bộ đoạn mã sao chép ở đây vào rồi bấm <strong>Lưu (Ctrl + S)</strong>.
+                          {t.gsStep2Desc} {t.gsStep3Desc}
                         </p>
                       </div>
 
                       <div className="p-3 bg-white border border-slate-200 rounded-xl space-y-1">
                         <div className="font-bold text-slate-900 flex items-center space-x-1.5">
                           <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-[10px]">3</span>
-                          <span>Triển khai dưới dạng Web App</span>
+                          <span>{t.gsStep4}</span>
                         </div>
                         <p className="text-[11px] text-slate-500">
-                          Góc trên bên phải, bấm <strong>Triển khai (Deploy) -&gt; Tùy chọn triển khai mới (New deployment)</strong>. Chọn biểu tượng bánh răng -&gt; <strong>Ứng dụng web (Web app)</strong>.
+                          {t.gsStep4Desc1} {t.gsStep4Desc2}
                         </p>
                       </div>
 
                       <div className="p-3 bg-white border border-slate-200 rounded-xl space-y-1">
                         <div className="font-bold text-slate-900 flex items-center space-x-1.5">
                           <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-[10px]">4</span>
-                          <span>Chọn quyền "Bất kỳ ai" & Dán URL</span>
+                          <span>{t.gsStep5}</span>
                         </div>
                         <p className="text-[11px] text-slate-500">
-                          Tại mục <em>Người có quyền truy cập</em>, chọn <strong>Bất kỳ ai (Anyone)</strong>. Sau đó sao chép Web App URL dán vào ô nhập liệu ở trên!
+                          {t.gsStep5Desc}
                         </p>
                       </div>
                     </div>
@@ -790,7 +791,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       {t.vercelDeployTip}
                     </h4>
                     <p className="text-[11px] text-indigo-700 leading-relaxed">
-                      Để lưu trữ dữ liệu ngoại tuyến hoặc đưa vào kho lưu trữ GitHub và triển khai Vercel, bạn có thể tải về tệp JSON sao lưu hoặc khôi phục dữ liệu bất cứ lúc nào.
+                      {t.amBackupIntro}
                     </p>
                   </div>
 
@@ -802,7 +803,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       <Download className="w-5 h-5 text-indigo-600 mb-2" />
                       <div>
                         <div className="font-bold text-slate-800 text-xs">{t.exportData}</div>
-                        <div className="text-[10px] text-slate-500 mt-0.5">Tải toàn bộ danh sách về máy (.json)</div>
+                        <div className="text-[10px] text-slate-500 mt-0.5">{t.amBackupDesc1}</div>
                       </div>
                     </button>
 
@@ -810,7 +811,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       <Upload className="w-5 h-5 text-emerald-600 mb-2" />
                       <div>
                         <div className="font-bold text-slate-800 text-xs">{t.importData}</div>
-                        <div className="text-[10px] text-slate-500 mt-0.5">Tải lên file JSON để khôi phục</div>
+                        <div className="text-[10px] text-slate-500 mt-0.5">{t.amBackupDesc2}</div>
                       </div>
                       <input
                         type="file"
@@ -827,7 +828,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       <RotateCcw className="w-5 h-5 text-amber-600 mb-2" />
                       <div>
                         <div className="font-bold text-slate-800 text-xs">{t.resetDefault}</div>
-                        <div className="text-[10px] text-slate-500 mt-0.5">Khôi phục danh mục mẫu ban đầu</div>
+                        <div className="text-[10px] text-slate-500 mt-0.5">{t.amBackupDesc3}</div>
                       </div>
                     </button>
                   </div>

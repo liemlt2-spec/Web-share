@@ -56,7 +56,11 @@ export const TimelineLayerCard: React.FC<TimelineLayerCardProps> = ({
       {/* Chronological Layer Badge */}
       <div className="absolute -top-3 left-6 flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-600 text-white text-[10px] font-bold shadow-sm">
         <Clock className="w-3 h-3" />
-        <span>Lớp ảnh #{index + 1} • {formatTimeAgo(project.createdAt, lang)}</span>
+        <span>
+          {t.timelineLayerLabel
+            .replace('{index}', String(index + 1))
+            .replace('{time}', formatTimeAgo(project.createdAt, lang))}
+        </span>
       </div>
 
       {/* Left / Top: Browser Mockup Frame in Wide Screen view */}
@@ -67,6 +71,7 @@ export const TimelineLayerCard: React.FC<TimelineLayerCardProps> = ({
           previewImage={project.previewImage}
           onClick={handleVisit}
           aspectRatio="video"
+          lang={lang}
         />
       </div>
 
@@ -121,7 +126,7 @@ export const TimelineLayerCard: React.FC<TimelineLayerCardProps> = ({
             </span>
             <span className="flex items-center space-x-1">
               <Eye className="w-3.5 h-3.5 text-slate-400" />
-              <span>{project.views} lượt xem</span>
+              <span>{t.viewsCount.replace('{count}', String(project.views))}</span>
             </span>
           </div>
 
@@ -159,7 +164,7 @@ export const TimelineLayerCard: React.FC<TimelineLayerCardProps> = ({
               <button
                 onClick={() => onDeleteRequest(project)}
                 className="p-2 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 transition-colors"
-                title="Xóa bài (Admin)"
+                title={t.deleteAdminTitle}
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>

@@ -12,6 +12,7 @@ import {
   WebProject,
 } from './types';
 import { INITIAL_PROJECTS } from './data/initialData';
+import { localizeProject } from './data/projectLocalizations';
 import { translations } from './translations';
 import { Header } from './components/Header';
 import { StatsBanner } from './components/StatsBanner';
@@ -290,11 +291,11 @@ export default function App() {
 
   const handleImportData = (imported: WebProject[]) => {
     setProjects(imported);
-    alert(`Đã nhập thành công ${imported.length} website vào hệ thống.`);
+    alert(t.amImportSuccess.replace('{count}', String(imported.length)));
   };
 
   const handleResetData = () => {
-    if (window.confirm('Bạn có chắc muốn khôi phục về danh sách mẫu ban đầu không?')) {
+    if (window.confirm(t.amResetConfirm)) {
       setProjects(INITIAL_PROJECTS);
       localStorage.removeItem(STORAGE_KEY_PROJECTS);
     }
@@ -304,6 +305,10 @@ export default function App() {
   const approvedProjects = useMemo(
     () => projects.filter((p) => p.status === 'approved'),
     [projects]
+  );
+  const localizedProjects = useMemo(
+    () => approvedProjects.map((p) => localizeProject(p, lang)),
+    [approvedProjects, lang]
   );
   const defaultApprovedCount = useMemo(
     () => approvedProjects.filter((p) => !p.isFamous).length,
@@ -315,7 +320,7 @@ export default function App() {
   );
 
   const filteredProjects = useMemo(() => {
-    return approvedProjects
+    return localizedProjects
       .filter((project) => {
         // Nếu người dùng bật nút "Nổi tiếng": hiển thị các mô phỏng nổi tiếng (PhET, GeoGebra, NetSim...)
         // Mặc định: hiển thị các bài mô phỏng do chúng ta duyệt trực tiếp trên trang web
@@ -386,7 +391,7 @@ export default function App() {
         }
         return 0;
       });
-  }, [approvedProjects, filters]);
+  }, [localizedProjects, filters]);
 
   const pendingCount = projects.filter((p) => p.status === 'pending').length;
 
@@ -438,7 +443,7 @@ export default function App() {
               {t.noWebsitesFound}
             </h3>
             <p className="text-xs text-slate-500 max-w-sm mx-auto mb-5">
-              Hãy thử chọn môn học khác, xóa từ khóa tìm kiếm hoặc bấm nút Nổi tiếng để khám phá thêm!
+              {t.emptyStateHint}
             </p>
             <div className="flex items-center justify-center space-x-3">
               <button
@@ -528,7 +533,7 @@ export default function App() {
               {t.submitWebsite}
             </button>
             <span>•</span>
-            <span className="text-slate-400">Vercel & GitHub Ready</span>
+            <span className="text-slate-400">{t.footerReady}</span>
           </div>
         </div>
       </footer>
@@ -573,6 +578,7 @@ export default function App() {
         onClose={() => setIsGoogleSyncOpen(false)}
         projects={projects}
         onSyncProjects={(syncedProjects) => setProjects(syncedProjects)}
+        lang={lang}
       />
 
       {/* Delete Confirmation Modal (Admin safety requirement) */}

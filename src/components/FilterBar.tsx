@@ -90,10 +90,10 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 ? 'bg-indigo-600 text-white border-indigo-700 shadow-sm shadow-indigo-500/20 ring-2 ring-indigo-300/40'
                 : 'bg-slate-100/90 text-slate-700 border-slate-200/80 hover:bg-slate-200/80 hover:text-slate-900'
             }`}
-            title="Xem các mô phỏng do thầy cô và cộng đồng đăng tải"
+            title={t.uploadTabTitle}
           >
             <UploadCloud className="w-3.5 h-3.5" />
-            <span className="whitespace-nowrap">Bài đăng tải</span>
+            <span className="whitespace-nowrap">{t.uploadTab}</span>
             <span
               className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold ${
                 !filters.onlyFamous
@@ -114,14 +114,14 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 ? 'bg-amber-500 text-white border-amber-600 shadow-sm shadow-amber-500/20 ring-2 ring-amber-300/50'
                 : 'bg-amber-50 text-amber-900 border-amber-200 hover:bg-amber-100 hover:border-amber-300'
             }`}
-            title="Xem các nền tảng mô phỏng nổi tiếng thế giới (PhET, GeoGebra, NetSim...)"
+            title={t.famousTabTitle}
           >
             <Sparkles
               className={`w-3.5 h-3.5 ${
                 filters.onlyFamous ? 'text-amber-100 fill-amber-100' : 'text-amber-600 fill-amber-500'
               }`}
             />
-            <span className="whitespace-nowrap">Nổi tiếng</span>
+            <span className="whitespace-nowrap">{t.famousTabShort}</span>
             <span
               className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold ${
                 filters.onlyFamous
@@ -142,10 +142,10 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               id="filterbar-open-submit-btn"
               onClick={onOpenSubmit}
               className="flex items-center space-x-1 px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
-              title="Đăng tải bài mô phỏng của bạn"
+              title={t.submitShortTitle}
             >
               <Plus className="w-3.5 h-3.5 text-indigo-300" />
-              <span className="hidden md:inline">Đăng tải</span>
+              <span className="hidden md:inline">{t.submitShort}</span>
             </button>
           )}
 
@@ -160,8 +160,8 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                   ? 'bg-white text-indigo-700 shadow-xs font-bold'
                   : 'text-slate-500 hover:text-slate-800'
               }`}
-              title="Chế độ xem rút gọn (Tên & Lĩnh vực)"
-              aria-label="Chế độ xem rút gọn"
+              title={t.viewModeCompact}
+              aria-label={t.viewModeCompact}
             >
               <AlignLeft className="w-4 h-4" />
             </button>
@@ -175,8 +175,8 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                   ? 'bg-white text-indigo-700 shadow-xs font-bold'
                   : 'text-slate-500 hover:text-slate-800'
               }`}
-              title="Chế độ xem mở rộng (Đầy đủ mockup & QR)"
-              aria-label="Chế độ xem mở rộng"
+              title={t.viewModeExpanded}
+              aria-label={t.viewModeExpanded}
             >
               <LayoutGrid className="w-4 h-4" />
             </button>
@@ -200,7 +200,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             <option value="ALL">📁 {t.allCategories}</option>
             {VN_SUBJECTS.map((subj) => (
               <option key={subj.id} value={subj.id}>
-                {subj.name}
+                {t.categoryNames[subj.id] ?? subj.name}
               </option>
             ))}
           </select>
@@ -249,15 +249,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       {(isFiltered || totalResults === 0) && (
         <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
           <span>
-            {filters.onlyFamous ? (
-              <span>
-                Tìm thấy <strong>{totalResults}</strong> mô phỏng nổi tiếng phù hợp
-              </span>
-            ) : (
-              <span>
-                Hiển thị <strong>{totalResults}</strong> mô phỏng đã duyệt phù hợp
-              </span>
-            )}
+            {filters.onlyFamous
+              ? t.resultsFamousFound.replace('{count}', String(totalResults))
+              : t.resultsApprovedFound.replace('{count}', String(totalResults))}
           </span>
           {isFiltered && (
             <button
@@ -265,7 +259,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               className="inline-flex items-center space-x-1 text-indigo-600 hover:text-indigo-800 text-[11px] font-semibold bg-indigo-50 hover:bg-indigo-100 px-2 py-0.5 rounded-md transition-colors cursor-pointer"
             >
               <RotateCcw className="w-3 h-3" />
-              <span>Đặt lại bộ lọc</span>
+              <span>{t.clearFilters}</span>
             </button>
           )}
         </div>

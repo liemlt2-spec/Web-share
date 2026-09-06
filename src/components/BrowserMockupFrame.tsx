@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { ExternalLink, Globe, Lock, ShieldCheck } from 'lucide-react';
+import { Language } from '../types';
+import { translations } from '../translations';
 import { extractDomain, getWebsiteScreenshotUrl } from '../utils/screenshot';
 
 interface BrowserMockupFrameProps {
@@ -8,6 +10,7 @@ interface BrowserMockupFrameProps {
   previewImage?: string;
   onClick?: () => void;
   aspectRatio?: 'video' | 'wide' | 'standard';
+  lang: Language;
 }
 
 export const BrowserMockupFrame: React.FC<BrowserMockupFrameProps> = ({
@@ -16,7 +19,9 @@ export const BrowserMockupFrame: React.FC<BrowserMockupFrameProps> = ({
   previewImage,
   onClick,
   aspectRatio = 'video',
+  lang,
 }) => {
+  const t = translations[lang];
   const [imageError, setImageError] = useState(false);
   const domain = extractDomain(url);
   const screenshotUrl = getWebsiteScreenshotUrl(url, previewImage);
@@ -75,7 +80,7 @@ export const BrowserMockupFrame: React.FC<BrowserMockupFrameProps> = ({
             <p className="text-xs text-indigo-300 font-mono mt-1 truncate max-w-[90%]">{url}</p>
             <div className="mt-3 inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-white/10 text-[10px] text-slate-300">
               <ShieldCheck className="w-3 h-3 text-emerald-400" />
-              <span>Bảo mật HTTPS</span>
+              <span>{t.httpsSecure}</span>
             </div>
           </div>
         )}
@@ -84,7 +89,7 @@ export const BrowserMockupFrame: React.FC<BrowserMockupFrameProps> = ({
         <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center backdrop-blur-[2px]">
           <span className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full bg-white text-slate-900 text-xs font-semibold shadow-lg transform translate-y-1 group-hover:translate-y-0 transition-transform">
             <ExternalLink className="w-3.5 h-3.5 text-indigo-600" />
-            <span>Mở trang web trực tiếp</span>
+            <span>{t.openWebsiteDirect}</span>
           </span>
         </div>
       </div>

@@ -76,6 +76,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           previewImage={project.previewImage}
           onClick={handleVisit}
           aspectRatio="video"
+          lang={lang}
         />
       </div>
 
@@ -115,7 +116,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
 
         {/* Submitter Info & Tags */}
         <div className="pt-2 border-t border-slate-100/80 flex items-center justify-between text-[11px] text-slate-500">
-          <div className="flex items-center space-x-1.5 truncate max-w-[180px]" title={`Ghi chú tác giả: ${project.authorName}`}>
+          <div className="flex items-center space-x-1.5 truncate max-w-[180px]" title={t.authorNoteTitle.replace('{name}', project.authorName)}>
             <div className="w-4 h-4 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-[9px] shrink-0">
               <User className="w-2.5 h-2.5" />
             </div>
@@ -161,7 +162,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           <button
             onClick={handleShare}
             className="p-2 rounded-xl border border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-            title="Chia sẻ link"
+            title={t.shareLinkTitle}
           >
             <Share2 className="w-3.5 h-3.5" />
           </button>
@@ -172,7 +173,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
               id={`delete-btn-${project.id}`}
               onClick={() => onDeleteRequest(project)}
               className="p-2 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 transition-colors"
-              title="Xóa bài (Admin)"
+              title={t.deleteAdminTitle}
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>

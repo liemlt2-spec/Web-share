@@ -42,7 +42,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
             </div>
             <div>
               <h3 className="font-semibold text-rose-900 text-sm">{t.confirmDeleteTitle}</h3>
-              <p className="text-[11px] text-rose-600">Quyền quản trị viên (Admin Only)</p>
+              <p className="text-[11px] text-rose-600">{t.adminOnlyBadge}</p>
             </div>
           </div>
           <button
@@ -77,7 +77,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
             <div className="overflow-hidden text-left flex-1 min-w-0">
               <h4 className="text-xs font-bold text-slate-900 truncate">{project.title}</h4>
               <p className="text-[11px] text-slate-500 font-mono truncate">{extractDomain(project.url)}</p>
-              <p className="text-[10px] text-slate-400 truncate mt-0.5">Tác giả: {project.authorName}</p>
+              <p className="text-[10px] text-slate-400 truncate mt-0.5">{t.authorLabelShort} {project.authorName}</p>
             </div>
           </div>
 

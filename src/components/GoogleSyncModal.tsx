@@ -17,7 +17,8 @@ import {
   X,
   Zap,
 } from 'lucide-react';
-import { WebProject } from '../types';
+import { Language, WebProject } from '../types';
+import { translations } from '../translations';
 import {
   getStoredScriptUrl,
   setStoredScriptUrl,
@@ -28,12 +29,14 @@ import {
   pushProjectsToSheet,
   GOOGLE_APPS_SCRIPT_CODE,
 } from '../services/googleSync';
+import { getLocaleCode } from '../utils/screenshot';
 
 interface GoogleSyncModalProps {
   isOpen: boolean;
   onClose: () => void;
   projects: WebProject[];
   onSyncProjects: (newProjects: WebProject[]) => void;
+  lang: Language;
 }
 
 export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
@@ -41,7 +44,9 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
   onClose,
   projects,
   onSyncProjects,
+  lang,
 }) => {
+  const t = translations[lang];
   const [scriptUrl, setScriptUrl] = useState(() => getStoredScriptUrl());
   const [isUrlSaved, setIsUrlSaved] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -75,12 +80,12 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
     if (clean) {
       setSyncStatusMsg({
         type: 'info',
-        text: 'Đã lưu đường dẫn Google Apps Script. Bấm "Tải dữ liệu từ Sheets" để kiểm tra kết nối!',
+        text: t.gsSavedUrlMsg,
       });
     } else {
       setSyncStatusMsg({
         type: 'info',
-        text: 'Đã xóa cấu hình kết nối Google Apps Script.',
+        text: t.gsClearedMsg,
       });
     }
   };
@@ -90,7 +95,7 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
     if (!scriptUrl.trim()) {
       setSyncStatusMsg({
         type: 'error',
-        text: 'Vui lòng dán đường link Google Apps Script Web App URL trước khi thực hiện.',
+        text: t.gsNeedUrlFirst,
       });
       return;
     }
@@ -124,7 +129,7 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
     if (!scriptUrl.trim()) {
       setSyncStatusMsg({
         type: 'error',
-        text: 'Vui lòng dán và lưu đường dẫn Google Apps Script trước khi tải lên.',
+        text: t.gsPushNeedUrl,
       });
       return;
     }
@@ -184,19 +189,19 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
             </div>
             <div>
               <h3 className="font-bold text-sm tracking-wide flex items-center space-x-2">
-                <span>Quản Lý & Đồng Bộ Google Sheets</span>
+                <span>{t.gsTitle}</span>
                 {scriptUrl ? (
                   <span className="px-2 py-0.5 rounded-full bg-emerald-500/30 text-emerald-200 text-[10px] font-mono border border-emerald-400/40">
-                    Đã cấu hình
+                    {t.gsConfigured}
                   </span>
                 ) : (
                   <span className="px-2 py-0.5 rounded-full bg-amber-500/30 text-amber-200 text-[10px] font-mono border border-amber-400/40">
-                    Chưa kết nối
+                    {t.gsNotConnected}
                   </span>
                 )}
               </h3>
               <p className="text-[11px] text-emerald-100/80">
-                Kiểm soát cả bài đăng tải và các trang mô phỏng nổi tiếng qua bảng tính Google Sheets
+                {t.gsHeaderDesc}
               </p>
             </div>
           </div>
@@ -220,7 +225,7 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
             }`}
           >
             <Zap className="w-3.5 h-3.5" />
-            <span>Kết nối & Đồng bộ</span>
+            <span>{t.gsTabConnect}</span>
           </button>
 
           <button
@@ -232,7 +237,7 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
             }`}
           >
             <HelpCircle className="w-3.5 h-3.5" />
-            <span>Hướng dẫn cài đặt</span>
+            <span>{t.gsTabGuide}</span>
           </button>
 
           <button
@@ -244,7 +249,7 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
             }`}
           >
             <Code2 className="w-3.5 h-3.5" />
-            <span>Mã nguồn Apps Script (Code.gs)</span>
+            <span>{t.gsTabCode}</span>
           </button>
         </div>
 
@@ -258,25 +263,25 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
                 <div className="p-3 bg-indigo-50/70 border border-indigo-100 rounded-xl">
                   <div className="flex items-center space-x-1.5 text-indigo-700 text-xs font-bold mb-0.5">
                     <UploadCloud className="w-3.5 h-3.5" />
-                    <span>Bài đăng tải</span>
+                    <span>{t.gsUploadPosts}</span>
                   </div>
                   <div className="text-xl font-extrabold text-indigo-900">{userCount}</div>
-                  <div className="text-[10px] text-indigo-600 mt-0.5">Cột IsFamous = FALSE</div>
+                  <div className="text-[10px] text-indigo-600 mt-0.5">{t.gsColFalse}</div>
                 </div>
 
                 <div className="p-3 bg-amber-50/70 border border-amber-100 rounded-xl">
                   <div className="flex items-center space-x-1.5 text-amber-800 text-xs font-bold mb-0.5">
                     <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                    <span>Trang nổi tiếng</span>
+                    <span>{t.gsFamousPages}</span>
                   </div>
                   <div className="text-xl font-extrabold text-amber-900">{famousCount}</div>
-                  <div className="text-[10px] text-amber-700 mt-0.5">Cột IsFamous = TRUE</div>
+                  <div className="text-[10px] text-amber-700 mt-0.5">{t.gsColTrue}</div>
                 </div>
 
                 <div className="col-span-2 sm:col-span-1 p-3 bg-slate-50 border border-slate-200 rounded-xl flex flex-col justify-between">
-                  <div className="text-[11px] font-bold text-slate-700">Trạng thái đồng bộ</div>
+                  <div className="text-[11px] font-bold text-slate-700">{t.gsSyncStatus}</div>
                   <div className="text-xs text-slate-500 truncate">
-                    {lastSync ? new Date(lastSync).toLocaleTimeString('vi-VN') : 'Chưa đồng bộ'}
+                    {lastSync ? new Date(lastSync).toLocaleString(getLocaleCode(lang)) : t.gsNotSynced}
                   </div>
                   <label className="flex items-center space-x-1.5 cursor-pointer text-[11px] text-slate-600 font-medium mt-1">
                     <input
@@ -285,7 +290,7 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
                       onChange={(e) => handleToggleAutoSync(e.target.checked)}
                       className="rounded text-emerald-600 focus:ring-emerald-500 w-3.5 h-3.5"
                     />
-                    <span>Tự động nạp dữ liệu ngầm</span>
+                    <span>{t.gsAutoLoad}</span>
                   </label>
                 </div>
               </div>
@@ -293,7 +298,7 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
               {/* URL Input Box */}
               <div className="p-4 bg-slate-50/80 border border-slate-200 rounded-2xl space-y-2">
                 <label className="block text-xs font-bold text-slate-900">
-                  Dán đường link Google Apps Script (Web App URL) vào đây:
+                  {t.gsUrlLabel}
                 </label>
                 <div className="flex items-center gap-2">
                   <div className="relative flex-1">
@@ -320,17 +325,17 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
                     className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center space-x-1.5 transition-all shrink-0 cursor-pointer shadow-xs"
                   >
                     <Save className="w-3.5 h-3.5" />
-                    <span>{isUrlSaved ? 'Đã lưu!' : 'Lưu URL'}</span>
+                    <span>{isUrlSaved ? t.gsSaved : t.gsSaveUrl}</span>
                   </button>
                 </div>
                 <p className="text-[11px] text-slate-500">
-                  Bạn có thể dán <strong>Web App URL</strong> (đuôi <strong>/exec</strong> là bản chính thức cho mọi người dùng) hoặc dán thẳng <strong>link Google Sheets</strong> — hệ thống sẽ tự động nhận diện và kết nối. Lưu ý: URL đuôi <strong>/dev</strong> chỉ hoạt động khi bạn đang đăng nhập Google để test.
+                  {t.gsUrlNote}
                 </p>
               </div>
 
               {/* Two-Way Actions */}
               <div className="p-4 bg-white border border-slate-200 rounded-2xl space-y-3 shadow-xs">
-                <div className="text-xs font-bold text-slate-900">Thao tác truy xuất & đẩy dữ liệu:</div>
+                <div className="text-xs font-bold text-slate-900">{t.gsActionsTitle}</div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   {/* Pull Data */}
                   <button
@@ -340,7 +345,7 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
                     className="w-full px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-sm disabled:opacity-50"
                   >
                     <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
-                    <span>{isSyncing ? 'Đang truy xuất...' : 'Tải dữ liệu từ Google Sheets'}</span>
+                    <span>{isSyncing ? t.gsFetching : t.gsFetch}</span>
                   </button>
 
                   {/* Push Data */}
@@ -351,12 +356,12 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
                     className="w-full px-4 py-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold flex items-center justify-center space-x-2 transition-all cursor-pointer disabled:opacity-50"
                   >
                     <Send className="w-4 h-4 text-indigo-600" />
-                    <span>Đẩy {projects.length} mô phỏng lên Sheets</span>
+                    <span>{t.gsPushCount.replace('{count}', String(projects.length))}</span>
                   </button>
                 </div>
 
                 <p className="text-[11px] text-slate-500 leading-relaxed">
-                  💡 <strong>Mẹo:</strong> Nếu bạn vừa tạo file Google Sheets mới toanh, hãy bấm nút <strong>"Đẩy {projects.length} mô phỏng lên Sheets"</strong> để hệ thống tự động tạo các cột tiêu đề và nạp đầy đủ danh mục mô phỏng mẫu ban đầu!
+                  {t.gsPushTip.replace('{count}', String(projects.length))}
                 </p>
               </div>
 
@@ -384,28 +389,22 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
 
               {/* Column Control Table Guide */}
               <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-xs">
-                <div className="font-bold text-slate-900">Cách kiểm soát 2 nhóm dữ liệu trực tiếp trong Sheets:</div>
+                <div className="font-bold text-slate-900">{t.gsControlGuide}</div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
                   <div className="p-2.5 bg-white rounded-lg border border-slate-200 space-y-1">
                     <div className="font-bold text-indigo-700 flex items-center space-x-1">
                       <span>📤</span>
-                      <span>1. Bài đăng tải (Cộng đồng / Thầy cô):</span>
+                      <span>{t.gsG1Title}</span>
                     </div>
-                    <p className="text-slate-600">
-                      Cột <strong>IsFamous</strong> điền <code>FALSE</code> (hoặc để trống).
-                    </p>
-                    <p className="text-slate-500">Hiển thị ở tab [Bài đăng tải] trên trang chủ.</p>
+                    <p className="text-slate-600">{t.gsG1Desc}</p>
                   </div>
 
                   <div className="p-2.5 bg-white rounded-lg border border-slate-200 space-y-1">
                     <div className="font-bold text-amber-800 flex items-center space-x-1">
                       <span>⭐</span>
-                      <span>2. Trang mô phỏng nổi tiếng (PhET, GeoGebra...):</span>
+                      <span>{t.gsG2Title}</span>
                     </div>
-                    <p className="text-slate-600">
-                      Cột <strong>IsFamous</strong> điền <code>TRUE</code>.
-                    </p>
-                    <p className="text-slate-500">Hiển thị khi người dùng bấm tab [Nổi tiếng].</p>
+                    <p className="text-slate-600">{t.gsG2Desc}</p>
                   </div>
                 </div>
               </div>
@@ -416,9 +415,9 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
           {activeTab === 'guide' && (
             <div className="space-y-3.5 text-xs text-slate-700">
               <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl space-y-1">
-                <h4 className="font-bold text-emerald-950">Quy trình 5 bước cài đặt Google Apps Script</h4>
+                <h4 className="font-bold text-emerald-950">{t.gsGuideTitle}</h4>
                 <p className="text-[11px] text-emerald-800 leading-relaxed">
-                  Chỉ mất 2 phút cài đặt một lần duy nhất, bạn sẽ có một hệ thống cơ sở dữ liệu đám mây miễn phí, kiểm soát hoàn toàn trên Google Sheets cá nhân.
+                  {t.gsGuideIntro}
                 </p>
               </div>
 
@@ -426,54 +425,50 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
                 <div className="p-3 bg-white border border-slate-200 rounded-xl space-y-1">
                   <div className="font-bold text-slate-900 flex items-center space-x-2">
                     <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[10px] font-bold">1</span>
-                    <span>Tạo một bảng tính Google Sheets</span>
+                    <span>{t.gsStep1}</span>
                   </div>
                   <p className="text-[11px] text-slate-500 pl-7">
-                    Mở Google Drive của bạn -&gt; Bấm nút <strong>Mới (+) -&gt; Google Trang tính (Google Sheets)</strong>. Bạn có thể đặt tên bất kỳ (Ví dụ: <em>WebHub_Database</em>).
+                    {t.gsStep1Desc}
                   </p>
                 </div>
 
                 <div className="p-3 bg-white border border-slate-200 rounded-xl space-y-1">
                   <div className="font-bold text-slate-900 flex items-center space-x-2">
                     <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[10px] font-bold">2</span>
-                    <span>Mở Apps Script</span>
+                    <span>{t.gsStep2}</span>
                   </div>
                   <p className="text-[11px] text-slate-500 pl-7">
-                    Trên thanh menu của Google Sheets, chọn <strong>Tiện ích mở rộng (Extensions) -&gt; Apps Script</strong>.
+                    {t.gsStep2Desc}
                   </p>
                 </div>
 
                 <div className="p-3 bg-white border border-slate-200 rounded-xl space-y-1">
                   <div className="font-bold text-slate-900 flex items-center space-x-2">
                     <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[10px] font-bold">3</span>
-                    <span>Dán đoạn mã Code.gs</span>
+                    <span>{t.gsStep3}</span>
                   </div>
                   <p className="text-[11px] text-slate-500 pl-7">
-                    Chuyển sang tab <strong>"Mã nguồn Apps Script"</strong> ở trên, bấm <strong>"Sao chép mã"</strong>. Trong trình soạn thảo Apps Script, xóa hết nội dung cũ rồi dán toàn bộ đoạn mã này vào. Nhấn <strong>Lưu (Ctrl + S)</strong>.
+                    {t.gsStep3Desc}
                   </p>
                 </div>
 
                 <div className="p-3 bg-white border border-slate-200 rounded-xl space-y-1">
                   <div className="font-bold text-slate-900 flex items-center space-x-2">
                     <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[10px] font-bold">4</span>
-                    <span>Triển khai dưới dạng Ứng dụng web (Web App)</span>
+                    <span>{t.gsStep4}</span>
                   </div>
                   <div className="text-[11px] text-slate-500 pl-7 space-y-1">
-                    <p>Ở góc trên bên phải, bấm nút <strong>Triển khai (Deploy) -&gt; Tùy chọn triển khai mới (New deployment)</strong>.</p>
-                    <p>Bấm vào biểu tượng bánh răng bên trái -&gt; Chọn <strong>Ứng dụng web (Web app)</strong>.</p>
-                    <p>• Mô tả: <em>WebHub API</em></p>
-                    <p>• Thực thi dưới dạng (Execute as): <strong>Tôi (Me)</strong></p>
-                    <p>• Người có quyền truy cập (Who has access): <strong className="text-rose-600 bg-rose-50 px-1 py-0.5 rounded border border-rose-200">Bất kỳ ai (Anyone)</strong> (Bắt buộc để website có thể đọc được dữ liệu mà không bị chặn).</p>
+                    <p>{t.gsStep4Desc}</p>
                   </div>
                 </div>
 
                 <div className="p-3 bg-white border border-slate-200 rounded-xl space-y-1">
                   <div className="font-bold text-slate-900 flex items-center space-x-2">
                     <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[10px] font-bold">5</span>
-                    <span>Sao chép Web App URL và dán vào WebHub</span>
+                    <span>{t.gsStep5}</span>
                   </div>
                   <p className="text-[11px] text-slate-500 pl-7">
-                    Sau khi cấp quyền, Google sẽ cấp cho bạn một đường link <strong>Web App URL</strong> có đuôi <code>/exec</code>. Hãy copy link đó dán vào ô nhập liệu ở Tab <strong>"Kết nối & Đồng bộ"</strong> và bấm <strong>Lưu</strong>!
+                    {t.gsStep5Desc}
                   </p>
                 </div>
               </div>
@@ -485,7 +480,7 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="text-xs font-bold text-slate-900">
-                  Mã nguồn Code.gs (Đã tối ưu phân loại IsFamous & CORS):
+                  {t.gsCodeTitle}
                 </div>
                 <button
                   id="copy-script-code-btn"
@@ -499,12 +494,12 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
                   {isCodeCopied ? (
                     <>
                       <Check className="w-3.5 h-3.5" />
-                      <span>Đã sao chép mã!</span>
+                      <span>{t.gsCodeCopied}</span>
                     </>
                   ) : (
                     <>
                       <Copy className="w-3.5 h-3.5" />
-                      <span>Sao chép mã Code.gs</span>
+                      <span>{t.gsCopyCode}</span>
                     </>
                   )}
                 </button>

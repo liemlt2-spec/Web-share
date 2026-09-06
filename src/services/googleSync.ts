@@ -11,7 +11,7 @@ export const STORAGE_KEY_AUTO_SYNC = 'webhub_google_auto_sync';
  * Đuôi /dev chỉ dùng để TEST (chỉ người có quyền sửa script truy cập được).
  */
 export const DEFAULT_SCRIPT_URL =
-  'https://script.google.com/macros/s/AKfycbxDHe3y_7RolY8NfQOn1vdkZAdkZevctCRK-bfkuag/dev';
+  'https://script.google.com/macros/s/AKfycbw7QvnRI3e2l_0B7Nl4KDeLEOT3CWo-P_CcjWGD5XIoT7XVBhsiWG3OKEVrOcihLyUm/exec';
 
 export interface SyncResult {
   success: boolean;
@@ -333,11 +333,80 @@ export async function updateProjectStatusInSheet(
 }
 
 /**
+ * Fetch pending/new submissions from the dedicated submissions tab (WebHub_Submissions)
+ */
+export async function fetchSubmissionsFromSheet(scriptUrl: string): Promise<SyncResult> {
+  const url = cleanScriptUrl(scriptUrl);
+  if (!url || url.includes('docs.google.com/spreadsheets')) {
+    return { success: false, message: 'Đây là đường dẫn Google Sheets trực tiếp. Vui lòng dùng Web App URL.' };
+  }
+
+  try {
+    const fetchUrl = url.includes('?') ? `${url}&action=getSubmissions` : `${url}?action=getSubmissions`;
+    const response = await fetch(fetchUrl, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+
+    const result = await response.json();
+    const rawList: any[] = result && Array.isArray(result.data) ? result.data : [];
+    const projects: WebProject[] = rawList.map((item: any, idx: number) => ({
+      id: String(item.id || `sub-gs-${idx}-${Date.now()}`),
+      title: String(item.title || 'Mô phỏng không tên'),
+      url: String(item.url || ''),
+      description: String(item.description || ''),
+      country: (item.country || 'VN') as any,
+      category: (item.category || 'general') as any,
+      educationLevel: (item.educationLevel || 'all') as any,
+      status: (item.status === 'pending' || item.status === 'rejected') ? item.status : 'pending',
+      createdAt: item.createdAt || new Date().toISOString(),
+      previewImage: item.previewImage || undefined,
+      authorName: String(item.authorName || 'Thành viên'),
+      authorContact: item.authorContact ? String(item.authorContact) : undefined,
+      tags: Array.isArray(item.tags)
+        ? item.tags
+        : (item.tags ? String(item.tags).split(',').map((t: string) => t.trim()) : []),
+      views: Number(item.views) || 0,
+      likes: Number(item.likes) || 0,
+      isFamous: Boolean(item.isFamous),
+    }));
+
+    return { success: true, message: `Đã tải ${projects.length} dự án mới từ Google Sheets`, count: projects.length, data: projects };
+  } catch (err: any) {
+    console.error('Fetch Submissions Error:', err);
+    return { success: false, message: `Không thể tải dự án mới: ${err.message || 'Lỗi mạng hoặc CORS'}` };
+  }
+}
+
+/**
+ * Delete submission(s) from the dedicated submissions tab (admin add/delete management)
+ */
+export async function deleteSubmissionsFromSheet(scriptUrl: string, projectIds: string[]): Promise<void> {
+  const url = cleanScriptUrl(scriptUrl);
+  if (!url || url.includes('docs.google.com/spreadsheets') || projectIds.length === 0) return;
+
+  try {
+    await fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'deleteProject', ids: projectIds }),
+    });
+  } catch (e) {
+    console.warn('Silent fail deleting submissions from Google Sheet', e);
+  }
+}
+
+/**
  * Complete Google Apps Script template code that the user can copy and paste into Google Sheets
  */
 export const GOOGLE_APPS_SCRIPT_CODE = `/**
  * Google Apps Script - WebHub Showcase Cloud Backend
- * Tự động đồng bộ website đã duyệt, chờ duyệt, bài đăng tải và trang nổi tiếng lên Google Sheets
+ * WebHub bây giờ quản lý 2 TAB trên Google Sheets:
+ *   1. WEBHUB_PROJECTS      -> Các mô phỏng ĐÃ DUYỆT (nổi tiếng + bài cộng đồng) đang hiển thị.
+ *   2. WEBHUB_SUBMISSIONS   -> Các DỰ ÁN MỚI do người dùng đăng tải (chờ duyệt / từ chối)
+ *                              để admin quản lý NHẬP - XÓA ngay trên bảng tính.
  * 
  * HƯỚNG DẪN CÀI ĐẶT 4 BƯỚC:
  * 1. Mở file Google Sheets mới trên Google Drive (đặt tên ví dụ: WebHub_Database).
@@ -352,42 +421,39 @@ export const GOOGLE_APPS_SCRIPT_CODE = `/**
  *    (có dạng: https://script.google.com/macros/s/.../exec) dán vào ô trên website!
  */
 
-const SHEET_NAME = "WebHub_Projects";
+const MAIN_SHEET = "WebHub_Projects";
+const SUBMISSION_SHEET = "WebHub_Submissions";
 
-function getOrCreateSheet() {
+const HEADERS = [
+  "ID",
+  "Title",
+  "URL",
+  "Description",
+  "Country",
+  "Category",
+  "EducationLevel",
+  "Status",
+  "IsFamous",
+  "AuthorName",
+  "AuthorContact",
+  "CreatedAt",
+  "PreviewImage",
+  "Tags",
+  "Views",
+  "Likes"
+];
+
+function ensureSheet(name) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  let sheet = ss.getSheetByName(SHEET_NAME);
+  let sheet = ss.getSheetByName(name);
   if (!sheet) {
-    sheet = ss.insertSheet(SHEET_NAME);
-    // Tạo hàng tiêu đề chuẩn 16 cột
-    const headers = [
-      "ID", 
-      "Title", 
-      "URL", 
-      "Description", 
-      "Country", 
-      "Category", 
-      "EducationLevel", 
-      "Status", 
-      "IsFamous", 
-      "AuthorName", 
-      "AuthorContact", 
-      "CreatedAt", 
-      "PreviewImage", 
-      "Tags", 
-      "Views", 
-      "Likes"
-    ];
-    sheet.appendRow(headers);
-    
-    // Định dạng tiêu đề đẹp mắt
-    const headerRange = sheet.getRange(1, 1, 1, headers.length);
+    sheet = ss.insertSheet(name);
+    sheet.appendRow(HEADERS);
+    const headerRange = sheet.getRange(1, 1, 1, HEADERS.length);
     headerRange.setFontWeight("bold");
     headerRange.setBackground("#4338CA"); // Indigo 700
     headerRange.setFontColor("#FFFFFF");
     sheet.setFrozenRows(1);
-    
-    // Tự động căn chỉnh độ rộng cột
     sheet.setColumnWidth(1, 140); // ID
     sheet.setColumnWidth(2, 220); // Title
     sheet.setColumnWidth(3, 260); // URL
@@ -398,171 +464,185 @@ function getOrCreateSheet() {
   return sheet;
 }
 
-// Xử lý đọc dữ liệu (GET) - Tối ưu truy xuất nhanh và thông minh theo tên cột
+// Đọc toàn bộ dữ liệu của 1 tab thành danh sách project (tự nhận diện cột theo tên)
+function parseRows(sheet) {
+  const data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return { rows: [] };
+  const headers = data[0].map(function (h) { return String(h).trim().toLowerCase(); });
+  const col = function (name, defaultIdx) {
+    const idx = headers.indexOf(name.toLowerCase());
+    return idx >= 0 ? idx : defaultIdx;
+  };
+  const projects = [];
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    if (!row[col("id", 0)] && !row[col("title", 1)] && !row[col("url", 2)]) continue;
+    const rawFamous = row[col("isfamous", 8)];
+    const isFamous = (
+      rawFamous === true ||
+      String(rawFamous).toUpperCase() === "TRUE" ||
+      String(rawFamous).toUpperCase() === "YES" ||
+      rawFamous === 1 ||
+      String(rawFamous) === "1"
+    );
+    projects.push({
+      id: String(row[col("id", 0)] || ("proj-" + i)),
+      title: String(row[col("title", 1)] || ""),
+      url: String(row[col("url", 2)] || ""),
+      description: String(row[col("description", 3)] || ""),
+      country: String(row[col("country", 4)] || "VN"),
+      category: String(row[col("category", 5)] || "general"),
+      educationLevel: String(row[col("educationlevel", 6)] || "all"),
+      status: String(row[col("status", 7)] || "approved"),
+      isFamous: isFamous,
+      authorName: String(row[col("authorname", 9)] || (isFamous ? "Nền tảng quốc tế" : "Thành viên")),
+      authorContact: String(row[col("authorcontact", 10)] || ""),
+      createdAt: row[col("createdat", 11)] ? (row[col("createdat", 11)] instanceof Date ? row[col("createdat", 11)].toISOString() : String(row[col("createdat", 11)])) : new Date().toISOString(),
+      previewImage: String(row[col("previewimage", 12)] || ""),
+      tags: row[col("tags", 13)] ? String(row[col("tags", 13)]).split(",").map(function (t) { return t.trim(); }) : [],
+      views: Number(row[col("views", 14)] || 0),
+      likes: Number(row[col("likes", 15)] || 0)
+    });
+  }
+  return { rows: projects };
+}
+
+// Chuyển project thành 1 hàng 16 cột
+function projectToRow(p) {
+  return [
+    p.id || ("proj-" + new Date().getTime()),
+    p.title || "",
+    p.url || "",
+    p.description || "",
+    p.country || "VN",
+    p.category || "general",
+    p.educationLevel || "all",
+    p.status || "approved",
+    p.isFamous ? true : false,
+    p.authorName || "Thành viên",
+    p.authorContact || "",
+    p.createdAt || new Date().toISOString(),
+    p.previewImage || "",
+    Array.isArray(p.tags) ? p.tags.join(", ") : "",
+    p.views || 0,
+    p.likes || 0
+  ];
+}
+
+// Thêm mới hoặc ghi đè toàn bộ hàng của 1 project theo ID
+function upsertRow(sheet, project) {
+  const row = projectToRow(project);
+  const data = sheet.getDataRange().getValues();
+  let foundRow = -1;
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(project.id)) { foundRow = i; break; }
+  }
+  if (foundRow >= 0) {
+    sheet.getRange(foundRow + 1, 1, 1, row.length).setValues([row]);
+  } else {
+    sheet.appendRow(row);
+  }
+}
+
+// Xóa các hàng theo danh sách ID, trả về số dòng đã xóa
+function deleteRowsById(sheet, ids) {
+  const data = sheet.getDataRange().getValues();
+  const removed = [];
+  for (let i = data.length - 1; i >= 1; i--) {
+    if (ids.indexOf(String(data[i][0])) >= 0) {
+      sheet.deleteRow(i + 1);
+      removed.push(String(data[i][0]));
+    }
+  }
+  return removed;
+}
+
+// Đọc dữ liệu theo GET - hỗ trợ 2 loại:
+//   ?action=getProjects    -> dữ liệu ĐÃ DUYỆT trên MAIN_SHEET (mặc định, dùng cho đồng bộ chính)
+//   ?action=getSubmissions -> dự án MỚI trên SUBMISSION_SHEET (quản lý bài chờ duyệt)
 function doGet(e) {
   try {
-    const sheet = getOrCreateSheet();
-    const data = sheet.getDataRange().getValues();
-    
-    if (data.length <= 1) {
-      return createJsonResponse({ status: "success", total: 0, data: [] });
+    const action = (e && e.parameter && e.parameter.action) || "getProjects";
+    if (action === "getSubmissions") {
+      const result = parseRows(ensureSheet(SUBMISSION_SHEET));
+      return createJsonResponse({ status: "success", total: result.rows.length, data: result.rows });
     }
-    
-    const headers = data[0].map(function(h) {
-      return String(h).trim().toLowerCase();
-    });
-    
-    // Hàm tìm vị trí cột theo tên hoặc theo vị trí mặc định
-    function col(name, defaultIdx) {
-      const idx = headers.indexOf(name.toLowerCase());
-      return idx >= 0 ? idx : defaultIdx;
-    }
-    
-    const colId = col("id", 0);
-    const colTitle = col("title", 1);
-    const colUrl = col("url", 2);
-    const colDesc = col("description", 3);
-    const colCountry = col("country", 4);
-    const colCategory = col("category", 5);
-    const colLevel = col("educationlevel", 6);
-    const colStatus = col("status", 7);
-    const colFamous = col("isfamous", 8);
-    const colAuthor = col("authorname", 9);
-    const colContact = col("authorcontact", 10);
-    const colCreated = col("createdat", 11);
-    const colImage = col("previewimage", 12);
-    const colTags = col("tags", 13);
-    const colViews = col("views", 14);
-    const colLikes = col("likes", 15);
-    
-    const projects = [];
-    
-    for (let i = 1; i < data.length; i++) {
-      const row = data[i];
-      if (!row[colId] && !row[colTitle] && !row[colUrl]) continue; // Bỏ qua dòng trống
-      
-      const rawFamous = row[colFamous];
-      const isFamous = (
-        rawFamous === true || 
-        String(rawFamous).toUpperCase() === "TRUE" || 
-        String(rawFamous).toUpperCase() === "YES" || 
-        rawFamous === 1 || 
-        String(rawFamous) === "1"
-      );
-      
-      const project = {
-        id: String(row[colId] || ("proj-" + i)),
-        title: String(row[colTitle] || ""),
-        url: String(row[colUrl] || ""),
-        description: String(row[colDesc] || ""),
-        country: String(row[colCountry] || "VN"),
-        category: String(row[colCategory] || "general"),
-        educationLevel: String(row[colLevel] || "all"),
-        status: String(row[colStatus] || "approved"),
-        isFamous: isFamous,
-        authorName: String(row[colAuthor] || (isFamous ? "Nền tảng quốc tế" : "Thành viên")),
-        authorContact: String(row[colContact] || ""),
-        createdAt: row[colCreated] ? (row[colCreated] instanceof Date ? row[colCreated].toISOString() : String(row[colCreated])) : new Date().toISOString(),
-        previewImage: String(row[colImage] || ""),
-        tags: row[colTags] ? String(row[colTags]).split(",").map(function(t) { return t.trim(); }) : [],
-        views: Number(row[colViews] || 0),
-        likes: Number(row[colLikes] || 0)
-      };
-      projects.push(project);
-    }
-    
-    return createJsonResponse({
-      status: "success",
-      total: projects.length,
-      data: projects
-    });
+    const result = parseRows(ensureSheet(MAIN_SHEET));
+    return createJsonResponse({ status: "success", total: result.rows.length, data: result.rows });
   } catch (error) {
     return createJsonResponse({ status: "error", message: error.toString() });
   }
 }
 
-// Xử lý thêm mới, đồng bộ hoặc cập nhật (POST)
+// Xử lý ghi dữ liệu (POST) - quản lý 2 tab:
+//   SUBMISSION_SHEET: dự án mới người dùng đăng (chờ duyệt / từ chối) để admin quản lý THÊM - XÓA.
+//   MAIN_SHEET:       mô phỏng ĐÃ DUYỆT đang hiển thị trên website.
 function doPost(e) {
   try {
-    const sheet = getOrCreateSheet();
     const contents = e.postData ? e.postData.contents : "{}";
     const payload = JSON.parse(contents);
-    
-    // 1. Đồng bộ toàn bộ dữ liệu từ website lên Google Sheets (khởi tạo hoặc ghi đè)
+
+    // 1. Đồng bộ toàn bộ dữ liệu ĐÃ DUYỆT lên MAIN_SHEET (khởi tạo hoặc ghi đè)
     if (payload.action === "syncAll" && Array.isArray(payload.projects)) {
+      const sheet = ensureSheet(MAIN_SHEET);
       const lastRow = sheet.getLastRow();
       if (lastRow > 1) {
         sheet.deleteRows(2, lastRow - 1);
       }
-      
-      const newRows = payload.projects.map(function(p) {
-        return [
-          p.id || ("proj-" + new Date().getTime()),
-          p.title || "",
-          p.url || "",
-          p.description || "",
-          p.country || "VN",
-          p.category || "general",
-          p.educationLevel || "all",
-          p.status || "approved",
-          p.isFamous ? true : false,
-          p.authorName || "",
-          p.authorContact || "",
-          p.createdAt || new Date().toISOString(),
-          p.previewImage || "",
-          Array.isArray(p.tags) ? p.tags.join(", ") : "",
-          p.views || 0,
-          p.likes || 0
-        ];
-      });
-      
+
+      const newRows = payload.projects.map(projectToRow);
+
       if (newRows.length > 0) {
         sheet.getRange(2, 1, newRows.length, newRows[0].length).setValues(newRows);
       }
-      
-      return createJsonResponse({ 
-        status: "success", 
-        message: "Đã đồng bộ toàn bộ " + newRows.length + " mô phỏng lên Google Sheets thành công!" 
+
+      return createJsonResponse({
+        status: "success",
+        message: "Đã đồng bộ toàn bộ " + newRows.length + " mô phỏng đã duyệt lên tab WebHub_Projects thành công!"
       });
     }
-    
-    // 2. Tự động thêm 1 bài mới khi người dùng đăng tải từ website
+
+    // 2. Người dùng đăng bài mới -> thêm vào SUBMISSION_SHEET (chờ admin duyệt)
     if (payload.action === "addProject" && payload.project) {
-      const p = payload.project;
-      sheet.appendRow([
-        p.id || ("proj-" + new Date().getTime()),
-        p.title || "",
-        p.url || "",
-        p.description || "",
-        p.country || "VN",
-        p.category || "general",
-        p.educationLevel || "all",
-        p.status || "approved",
-        p.isFamous ? true : false,
-        p.authorName || "Thành viên",
-        p.authorContact || "",
-        p.createdAt || new Date().toISOString(),
-        p.previewImage || "",
-        Array.isArray(p.tags) ? p.tags.join(", ") : "",
-        p.views || 0,
-        p.likes || 0
-      ]);
-      return createJsonResponse({ status: "success", message: "Đã ghi nhận bài đăng mới vào Google Sheets" });
+      ensureSheet(SUBMISSION_SHEET).appendRow(projectToRow(payload.project));
+      return createJsonResponse({ status: "success", message: "Đã ghi nhận bài đăng mới vào tab WebHub_Submissions" });
     }
-    
-    // 3. Cập nhật trạng thái duyệt (approved / rejected)
+
+    // 3. Upsert TOÀN BỘ thông tin 1 mô phỏng (dùng khi admin duyệt/từ chối).
+    //    Luôn ghi vào SUBMISSION_SHEET để admin còn quản lý; nếu bài đã DUYỆT thì đồng bộ thêm vào MAIN_SHEET.
+    if (payload.action === "upsertProject" && payload.project) {
+      const p = payload.project;
+      upsertRow(ensureSheet(SUBMISSION_SHEET), p);
+      if (String(p.status) === "approved") {
+        upsertRow(ensureSheet(MAIN_SHEET), p);
+      }
+      return createJsonResponse({ status: "success", message: "Đã đồng bộ thông tin mô phỏng vào Google Sheets" });
+    }
+
+    // 4. Cập nhật trạng thái duyệt (approved / rejected). Nếu APPROVED thì sao chép sang MAIN_SHEET.
     if (payload.action === "updateStatus" && payload.projectId && payload.status) {
-      const data = sheet.getDataRange().getValues();
+      const sSheet = ensureSheet(SUBMISSION_SHEET);
+      const data = sSheet.getDataRange().getValues();
       for (let i = 1; i < data.length; i++) {
         if (String(data[i][0]) === String(payload.projectId)) {
-          sheet.getRange(i + 1, 8).setValue(payload.status);
+          sSheet.getRange(i + 1, 8).setValue(payload.status);
+          if (payload.status === "approved") {
+            const result = parseRows(sSheet);
+            for (let j = 0; j < result.rows.length; j++) {
+              if (String(result.rows[j].id) === String(payload.projectId)) {
+                upsertRow(ensureSheet(MAIN_SHEET), result.rows[j]);
+                break;
+              }
+            }
+          }
           return createJsonResponse({ status: "success", message: "Đã cập nhật trạng thái bài viết" });
         }
       }
     }
-    
-    // 4. Chuyển đổi cờ Nổi tiếng (isFamous: true/false)
+
+    // 5. Chuyển đổi cờ Nổi tiếng (isFamous: true/false) trên MAIN_SHEET
     if (payload.action === "toggleFamous" && payload.projectId) {
+      const sheet = ensureSheet(MAIN_SHEET);
       const data = sheet.getDataRange().getValues();
       for (let i = 1; i < data.length; i++) {
         if (String(data[i][0]) === String(payload.projectId)) {
@@ -573,43 +653,14 @@ function doPost(e) {
         }
       }
     }
-    
-    // 5. Upsert (thêm mới hoặc cập nhật) TOÀN BỘ thông tin 1 mô phỏng vào 1 hàng
-    // Khi admin duyệt / từ chối: ghi đủ title, url, mô tả, ảnh đại diện, tags, views, likes...
-    // để các thiết bị khác tải về từ Sheets có ngay dữ liệu đầy đủ.
-    if (payload.action === "upsertProject" && payload.project) {
-      const p = payload.project;
-      const row = [
-        p.id || ("proj-" + new Date().getTime()),
-        p.title || "",
-        p.url || "",
-        p.description || "",
-        p.country || "VN",
-        p.category || "general",
-        p.educationLevel || "all",
-        p.status || "approved",
-        p.isFamous ? true : false,
-        p.authorName || "Thành viên",
-        p.authorContact || "",
-        p.createdAt || new Date().toISOString(),
-        p.previewImage || "",
-        Array.isArray(p.tags) ? p.tags.join(", ") : "",
-        p.views || 0,
-        p.likes || 0
-      ];
-      const data = sheet.getDataRange().getValues();
-      let foundRow = -1;
-      for (let i = 1; i < data.length; i++) {
-        if (String(data[i][0]) === String(p.id)) { foundRow = i; break; }
-      }
-      if (foundRow >= 0) {
-        sheet.getRange(foundRow + 1, 1, 1, row.length).setValues([row]);
-      } else {
-        sheet.appendRow(row);
-      }
-      return createJsonResponse({ status: "success", message: "Đã đồng bộ thông tin mô phỏng vào Google Sheets" });
+
+    // 6. Xóa dự án khỏi SUBMISSION_SHEET (admin quản lý THÊM - XÓA trên bảng tính)
+    if (payload.action === "deleteProject") {
+      const ids = Array.isArray(payload.ids) ? payload.ids : [payload.projectId];
+      const removed = deleteRowsById(ensureSheet(SUBMISSION_SHEET), ids);
+      return createJsonResponse({ status: "success", message: "Đã xóa " + removed.length + " dự án khỏi tab WebHub_Submissions", removed: removed.length });
     }
-    
+
     return createJsonResponse({ status: "ignored", message: "Không có hành động phù hợp" });
   } catch (error) {
     return createJsonResponse({ status: "error", message: error.toString() });

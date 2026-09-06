@@ -101,7 +101,7 @@ export const Header: React.FC<HeaderProps> = ({
                 id="language-selector-btn"
                 onClick={() => setLangMenuOpen(!langMenuOpen)}
                 className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl border border-slate-200/80 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 transition-colors"
-                title="Chọn ngôn ngữ / Select Language"
+                title={t.selectLanguage}
               >
                 <span>{currentLangObj.flag}</span>
                 <span className="hidden sm:inline">{currentLangObj.name}</span>
@@ -145,10 +145,10 @@ export const Header: React.FC<HeaderProps> = ({
               id="header-submit-btn"
               onClick={onOpenSubmit}
               className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-bold shadow-sm shadow-indigo-500/20 transition-all cursor-pointer"
-              title="Đăng tải mô phỏng / website mới"
+              title={t.submitUploadTitle}
             >
               <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">Đăng tải</span>
+              <span className="hidden sm:inline">{t.submitShort}</span>
             </button>
 
             {/* Google Sheets Sync Button */}
@@ -161,10 +161,10 @@ export const Header: React.FC<HeaderProps> = ({
                     ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'
                     : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
                 }`}
-                title="Cấu hình & Đồng bộ dữ liệu qua Google Sheets"
+                title={t.googleSyncTab}
               >
                 <FileSpreadsheet className={`w-3.5 h-3.5 ${hasGoogleSync ? 'text-emerald-600' : 'text-slate-500'}`} />
-                <span className="hidden sm:inline">Google Sheets</span>
+                <span className="hidden sm:inline">{t.googleSyncTab}</span>
                 {hasGoogleSync ? (
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 ) : (

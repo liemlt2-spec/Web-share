@@ -55,7 +55,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
       country,
       category,
       educationLevel,
-      status: 'approved',
+      status: 'pending',
       authorName: authorName.trim() || 'Thành viên cộng đồng',
       authorContact: authorContact.trim(),
       previewImage: customThumbnail.trim() || undefined,
@@ -111,7 +111,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
               <h3 className="font-bold text-slate-900 text-base">{t.submitModalTitle}</h3>
               <p className="text-xs text-slate-500">
                 {isAdmin
-                  ? 'Quyền Admin: Website được duyệt và hiển thị ngay lập tức.'
+                  ? 'Quyền Admin: Bài đăng sẽ vào danh sách chờ duyệt trong bảng điều khiển.'
                   : t.submitModalSubtitle}
               </p>
             </div>
@@ -133,7 +133,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
             </div>
             <h3 className="text-xl font-bold text-slate-900">{t.submitSuccess}</h3>
             <p className="text-xs text-slate-600 max-w-md leading-relaxed">
-              Bài mô phỏng đã được đăng tải và hiển thị thành công trên trang chủ!
+              Bài mô phỏng đã được gửi đến ban quản trị. Sau khi được duyệt, bài sẽ hiển thị ngay trên trang chủ!
             </p>
           </div>
         ) : (

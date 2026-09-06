@@ -28,9 +28,10 @@ import {
   getStoredScriptUrl,
   isAutoSyncEnabled,
   pushSingleProjectToSheet,
-  updateProjectStatusInSheet,
+  upsertProjectToSheet,
   fetchProjectsFromSheet,
 } from './services/googleSync';
+import { getWebsiteScreenshotUrl } from './utils/screenshot';
 
 const STORAGE_KEY_PROJECTS = 'webhub_projects_data_v3';
 const STORAGE_KEY_LANG = 'webhub_language_preference';
@@ -139,11 +140,8 @@ export default function App() {
                     (existing) => existing.id === item.id || existing.url === item.url
                   )
                 ) {
-                  // Ensure submitted items show up
-                  mergedList.push({
-                    ...item,
-                    status: 'approved',
-                  });
+                  // Giữ nguyên trạng thái (approved / pending / rejected) khi tải lại
+                  mergedList.push({ ...item });
                 }
               }
             }
@@ -220,19 +218,25 @@ export default function App() {
   const handleSubmitNewProject = (
     data: Omit<WebProject, 'id' | 'createdAt' | 'views' | 'likes'>
   ) => {
+    // Tự tạo ảnh đại diện (screenshot) nếu người dùng không tải ảnh lên
+    const thumbnail =
+      (data.previewImage && data.previewImage.trim()) ||
+      getWebsiteScreenshotUrl(data.url);
+
     const newProject: WebProject = {
       ...data,
       id: `proj-${Date.now()}`,
-      status: 'approved', // Auto-approved so user immediately sees their upload
+      status: 'pending', // Chờ admin duyệt trước khi hiển thị công khai
       createdAt: new Date().toISOString(),
       views: 1,
       likes: 0,
+      previewImage: thumbnail,
     };
     setProjects((prev) => [newProject, ...prev]);
-    // Automatically switch to "Bài đăng tải" tab so they can see their submission right away
+    // Chuyển về tab "Bài đăng tải" mặc định
     setFilters((prev) => ({ ...prev, onlyFamous: false }));
 
-    // Auto-sync new project to Google Sheets if configured
+    // Đẩy bài mới (trạng thái pending) lên Google Sheets nếu đã cấu hình
     const scriptUrl = getStoredScriptUrl();
     if (scriptUrl && isAutoSyncEnabled()) {
       pushSingleProjectToSheet(scriptUrl, newProject);
@@ -244,10 +248,12 @@ export default function App() {
       prev.map((p) => (p.id === id ? { ...p, status: 'approved' } : p))
     );
 
-    // Auto-sync status to Google Sheets if configured
+    // Đồng bộ toàn bộ thông tin bài (gồm ảnh đại diện) lên Google Sheets
+    const project = projects.find((p) => p.id === id);
+    if (!project) return;
     const scriptUrl = getStoredScriptUrl();
     if (scriptUrl && isAutoSyncEnabled()) {
-      updateProjectStatusInSheet(scriptUrl, id, 'approved');
+      upsertProjectToSheet(scriptUrl, { ...project, status: 'approved' });
     }
   };
 
@@ -256,10 +262,12 @@ export default function App() {
       prev.map((p) => (p.id === id ? { ...p, status: 'rejected' } : p))
     );
 
-    // Auto-sync status to Google Sheets if configured
+    // Đồng bộ trạng thái từ chối (kèm toàn bộ thông tin) lên Google Sheets
+    const project = projects.find((p) => p.id === id);
+    if (!project) return;
     const scriptUrl = getStoredScriptUrl();
     if (scriptUrl && isAutoSyncEnabled()) {
-      updateProjectStatusInSheet(scriptUrl, id, 'rejected');
+      upsertProjectToSheet(scriptUrl, { ...project, status: 'rejected' });
     }
   };
 

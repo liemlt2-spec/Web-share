@@ -278,6 +278,32 @@ export async function pushSingleProjectToSheet(scriptUrl: string, project: WebPr
 }
 
 /**
+ * Upsert (thêm mới hoặc cập nhật) toàn bộ thông tin của 1 mô phỏng vào một hàng của Google Sheets,
+ * gồm title, url, mô tả, ảnh đại diện, tags, views, likes... Dùng khi admin duyệt/từ chối
+ * để mọi thiết bị truy cập khác khi tải dữ liệu từ Sheets sẽ có ngay thông tin đầy đủ.
+ */
+export async function upsertProjectToSheet(scriptUrl: string, project: WebProject): Promise<void> {
+  const url = cleanScriptUrl(scriptUrl);
+  if (!url || url.includes('docs.google.com/spreadsheets')) return;
+
+  try {
+    await fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+      },
+      body: JSON.stringify({
+        action: 'upsertProject',
+        project: project,
+      }),
+    });
+  } catch (e) {
+    console.warn('Silent fail upserting project to Google Sheet', e);
+  }
+}
+
+/**
  * Update project status in Google Apps Script
  */
 export async function updateProjectStatusInSheet(
@@ -546,6 +572,42 @@ function doPost(e) {
           return createJsonResponse({ status: "success", message: "Đã cập nhật phân loại nổi tiếng", isFamous: newVal });
         }
       }
+    }
+    
+    // 5. Upsert (thêm mới hoặc cập nhật) TOÀN BỘ thông tin 1 mô phỏng vào 1 hàng
+    // Khi admin duyệt / từ chối: ghi đủ title, url, mô tả, ảnh đại diện, tags, views, likes...
+    // để các thiết bị khác tải về từ Sheets có ngay dữ liệu đầy đủ.
+    if (payload.action === "upsertProject" && payload.project) {
+      const p = payload.project;
+      const row = [
+        p.id || ("proj-" + new Date().getTime()),
+        p.title || "",
+        p.url || "",
+        p.description || "",
+        p.country || "VN",
+        p.category || "general",
+        p.educationLevel || "all",
+        p.status || "approved",
+        p.isFamous ? true : false,
+        p.authorName || "Thành viên",
+        p.authorContact || "",
+        p.createdAt || new Date().toISOString(),
+        p.previewImage || "",
+        Array.isArray(p.tags) ? p.tags.join(", ") : "",
+        p.views || 0,
+        p.likes || 0
+      ];
+      const data = sheet.getDataRange().getValues();
+      let foundRow = -1;
+      for (let i = 1; i < data.length; i++) {
+        if (String(data[i][0]) === String(p.id)) { foundRow = i; break; }
+      }
+      if (foundRow >= 0) {
+        sheet.getRange(foundRow + 1, 1, 1, row.length).setValues([row]);
+      } else {
+        sheet.appendRow(row);
+      }
+      return createJsonResponse({ status: "success", message: "Đã đồng bộ thông tin mô phỏng vào Google Sheets" });
     }
     
     return createJsonResponse({ status: "ignored", message: "Không có hành động phù hợp" });

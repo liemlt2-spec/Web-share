@@ -579,10 +579,16 @@ function doGet(e) {
 //   MAIN_SHEET:       mô phỏng ĐÃ DUYỆT đang hiển thị trên website.
 function doPost(e) {
   try {
-    const contents = e.postData ? e.postData.contents : "{}";
-    const payload = JSON.parse(contents);
+    // Đọc body ĐÚNG charset UTF-8 (tránh lỗi tiếng Việt / ký tự SEA bị vỡ chữ trong sheet).
+    const postData = e.postData;
+    const rawBody = postData
+      ? (typeof postData.getDataAsString === "function"
+          ? postData.getDataAsString("UTF-8")
+          : postData.contents)
+      : "{}";
+    const payload = JSON.parse(rawBody);
 
-    // 1. Đồng bộ toàn bộ dữ liệu ĐÃ DUYỆT lên MAIN_SHEET (khởi tạo hoặc ghi đè)
+    // 1. Đồng bộ dữ liệu ĐÃ DUYỆT lên MAIN_SHEET (chỉ lấy status approved, khởi tạo hoặc ghi đè)
     if (payload.action === "syncAll" && Array.isArray(payload.projects)) {
       const sheet = ensureSheet(MAIN_SHEET);
       const lastRow = sheet.getLastRow();
@@ -590,7 +596,9 @@ function doPost(e) {
         sheet.deleteRows(2, lastRow - 1);
       }
 
-      const newRows = payload.projects.map(projectToRow);
+      const newRows = payload.projects
+        .filter(function (p) { return String(p.status || "approved") === "approved"; })
+        .map(projectToRow);
 
       if (newRows.length > 0) {
         sheet.getRange(2, 1, newRows.length, newRows[0].length).setValues(newRows);
@@ -638,6 +646,7 @@ function doPost(e) {
           return createJsonResponse({ status: "success", message: "Đã cập nhật trạng thái bài viết" });
         }
       }
+      return createJsonResponse({ status: "error", message: "Không tìm thấy bài viết trong WebHub_Submissions" });
     }
 
     // 5. Chuyển đổi cờ Nổi tiếng (isFamous: true/false) trên MAIN_SHEET
@@ -652,6 +661,7 @@ function doPost(e) {
           return createJsonResponse({ status: "success", message: "Đã cập nhật phân loại nổi tiếng", isFamous: newVal });
         }
       }
+      return createJsonResponse({ status: "error", message: "Không tìm thấy bài viết trong WebHub_Projects" });
     }
 
     // 6. Xóa dự án khỏi SUBMISSION_SHEET (admin quản lý THÊM - XÓA trên bảng tính)

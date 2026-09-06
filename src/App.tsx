@@ -278,6 +278,14 @@ export default function App() {
     setProjects((prev) => prev.filter((p) => p.id !== id));
   };
 
+  const handleUpdateProject = (updated: WebProject) => {
+    setProjects((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+    const scriptUrl = getStoredScriptUrl();
+    if (scriptUrl && isAutoSyncEnabled()) {
+      upsertProjectToSheet(scriptUrl, updated);
+    }
+  };
+
   const handleExportData = () => {
     const jsonStr = JSON.stringify(projects, null, 2);
     const blob = new Blob([jsonStr], { type: 'application/json' });
@@ -565,6 +573,7 @@ export default function App() {
         onApprove={handleApprove}
         onReject={handleReject}
         onDeleteRequest={(p) => setProjectToDelete(p)}
+        onUpdateProject={handleUpdateProject}
         onExportData={handleExportData}
         onImportData={handleImportData}
         onResetData={handleResetData}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CheckCircle2, Globe, Sparkles, Upload, X } from 'lucide-react';
 import { BrowserMockupFrame } from './BrowserMockupFrame';
 import { CategoryId, CountryCode, EducationLevelId, Language, VN_SUBJECTS, WebProject } from '../types';
@@ -8,6 +8,8 @@ interface SubmitModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (projectData: Omit<WebProject, 'id' | 'createdAt' | 'views' | 'likes'>) => void;
+  editingProject?: WebProject | null;
+  onUpdate?: (project: WebProject) => void;
   lang: Language;
   isAdmin: boolean;
 }
@@ -16,6 +18,8 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
+  editingProject,
+  onUpdate,
   lang,
   isAdmin,
 }) => {
@@ -33,6 +37,34 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
   const [tagsInput, setTagsInput] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    if (editingProject) {
+      setUrl(editingProject.url || '');
+      setTitle(editingProject.title || '');
+      setDescription(editingProject.description || '');
+      setCountry((editingProject.country as CountryCode) || 'VN');
+      setCategory((editingProject.category as CategoryId) || 'toan');
+      setEducationLevel((editingProject.educationLevel as EducationLevelId) || 'general');
+      setAuthorName(editingProject.authorName || '');
+      setAuthorContact(editingProject.authorContact || '');
+      setCustomThumbnail(editingProject.previewImage || '');
+      setTagsInput(Array.isArray(editingProject.tags) ? editingProject.tags.join(', ') : '');
+    } else {
+      setUrl('');
+      setTitle('');
+      setDescription('');
+      setCountry('VN');
+      setCategory('toan');
+      setEducationLevel('general');
+      setAuthorName('');
+      setAuthorContact('');
+      setCustomThumbnail('');
+      setTagsInput('');
+    }
+    setIsSuccess(false);
+  }, [isOpen, editingProject]);
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -48,19 +80,35 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
       ? tagsInput.split(',').map((tag) => tag.trim()).filter(Boolean)
       : [category, country];
 
-    onSubmit({
-      url: normalizedUrl,
-      title: title.trim(),
-      description: description.trim() || t.smDefaultDesc,
-      country,
-      category,
-      educationLevel,
-      status: 'pending',
-      authorName: authorName.trim() || t.smDefaultAuthor,
-      authorContact: authorContact.trim(),
-      previewImage: customThumbnail.trim() || undefined,
-      tags,
-    });
+    if (editingProject && onUpdate) {
+      onUpdate({
+        ...editingProject,
+        url: normalizedUrl,
+        title: title.trim(),
+        description: description.trim() || t.smDefaultDesc,
+        country,
+        category,
+        educationLevel,
+        authorName: authorName.trim() || t.smDefaultAuthor,
+        authorContact: authorContact.trim(),
+        previewImage: customThumbnail.trim() || undefined,
+        tags,
+      });
+    } else {
+      onSubmit({
+        url: normalizedUrl,
+        title: title.trim(),
+        description: description.trim() || t.smDefaultDesc,
+        country,
+        category,
+        educationLevel,
+        status: 'pending',
+        authorName: authorName.trim() || t.smDefaultAuthor,
+        authorContact: authorContact.trim(),
+        previewImage: customThumbnail.trim() || undefined,
+        tags,
+      });
+    }
 
     setIsSuccess(true);
     setTimeout(() => {
@@ -108,7 +156,9 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
               <Globe className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-900 text-base">{t.submitModalTitle}</h3>
+              <h3 className="font-bold text-slate-900 text-base">
+                {editingProject ? t.smEditTitle : t.submitModalTitle}
+              </h3>
               <p className="text-xs text-slate-500">
                 {isAdmin
                   ? t.smAdminNote

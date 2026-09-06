@@ -12,6 +12,7 @@ import {
   Globe2,
   KeyRound,
   Lock,
+  Pencil,
   RefreshCw,
   RotateCcw,
   Save,
@@ -25,6 +26,7 @@ import {
 } from 'lucide-react';
 import { WebProject, Language } from '../types';
 import { translations } from '../translations';
+import { SubmitModal } from './SubmitModal';
 import { extractDomain, formatTimeAgo, getLocaleCode } from '../utils/screenshot';
 import {
   getStoredScriptUrl,
@@ -46,6 +48,7 @@ interface AdminModalProps {
   onApprove: (id: string) => void;
   onReject: (id: string) => void;
   onDeleteRequest: (project: WebProject) => void;
+  onUpdateProject?: (project: WebProject) => void;
   onExportData: () => void;
   onImportData: (data: WebProject[]) => void;
   onResetData: () => void;
@@ -62,6 +65,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   onApprove,
   onReject,
   onDeleteRequest,
+  onUpdateProject,
   onExportData,
   onImportData,
   onResetData,
@@ -88,6 +92,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [lastSync, setLastSync] = useState<string | null>(() => getLastSyncTime());
   const [autoSync, setAutoSync] = useState<boolean>(() => isAutoSyncEnabled());
   const [isCodeCopied, setIsCodeCopied] = useState(false);
+  const [editingProject, setEditingProject] = useState<WebProject | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -122,6 +127,11 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const handleLogout = () => {
     setIsAdmin(false);
     onClose();
+  };
+
+  const handleUpdateProject = (updated: WebProject) => {
+    if (onUpdateProject) onUpdateProject(updated);
+    setEditingProject(null);
   };
 
   // Save Google Apps Script URL
@@ -487,6 +497,14 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
                           {/* Approval Actions */}
                           <div className="flex items-center space-x-2 shrink-0">
+                            <button
+                              onClick={() => setEditingProject(item)}
+                              className="px-3 py-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 text-xs font-semibold flex items-center space-x-1"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                              <span>{t.amEdit}</span>
+                            </button>
+
                             <a
                               href={item.url}
                               target="_blank"
@@ -541,6 +559,13 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       </div>
 
                       <div className="flex items-center space-x-2 shrink-0">
+                        <button
+                          onClick={() => setEditingProject(item)}
+                          className="p-1.5 text-slate-400 hover:text-indigo-600 rounded-lg hover:bg-slate-100"
+                          title={t.amEdit}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
                         <a
                           href={item.url}
                           target="_blank"
@@ -838,6 +863,18 @@ export const AdminModal: React.FC<AdminModalProps> = ({
           </div>
         )}
       </div>
+
+      {editingProject && (
+        <SubmitModal
+          isOpen={true}
+          onClose={() => setEditingProject(null)}
+          onSubmit={() => {}}
+          editingProject={editingProject}
+          onUpdate={handleUpdateProject}
+          lang={lang}
+          isAdmin={isAdmin}
+        />
+      )}
     </div>
   );
 };

@@ -121,6 +121,7 @@ export interface Translations {
   smUploadImage: string;
   smMockupTitle: string;
   smSuccessDesc: string;
+  smEditTitle: string;
   gsTitle: string;
   gsConfigured: string;
   gsNotConnected: string;
@@ -183,6 +184,7 @@ export interface Translations {
   amNoPendingDesc: string;
   amPendingHint: string;
   amOpenLink: string;
+  amEdit: string;
   amApprovedHint: string;
   amOpenWebsite: string;
   amDeleteWebsite: string;
@@ -330,6 +332,7 @@ export const translations: Record<Language, Translations> = {
     smUploadImage: 'Tải ảnh',
     smMockupTitle: 'Tiêu đề website của bạn',
     smSuccessDesc: 'Bài mô phỏng đã được gửi đến ban quản trị. Sau khi được duyệt, bài sẽ hiển thị ngay trên trang chủ!',
+    smEditTitle: 'Chỉnh sửa mô phỏng',
     gsTitle: 'Quản Lý & Đồng Bộ Google Sheets',
     gsConfigured: 'Đã cấu hình',
     gsNotConnected: 'Chưa kết nối',
@@ -392,6 +395,7 @@ export const translations: Record<Language, Translations> = {
     amNoPendingDesc: 'Tất cả đề xuất từ cộng đồng đã được xử lý xong!',
     amPendingHint: 'Các bài viết dưới đây do người dùng đóng góp. Bạn hãy kiểm tra link và nhấn Duyệt để hiển thị công khai trên trang chủ hoặc Từ chối.',
     amOpenLink: 'Mở link',
+    amEdit: 'Sửa',
     amApprovedHint: 'Danh sách các website đã được duyệt đang công khai trên trang chủ. Bạn có thể xóa bất kỳ bài nào với chức năng xác nhận an toàn.',
     amOpenWebsite: 'Mở website',
     amDeleteWebsite: 'Xác nhận xóa website',
@@ -578,6 +582,7 @@ export const translations: Record<Language, Translations> = {
     smUploadImage: 'Upload image',
     smMockupTitle: 'Your website title',
     smSuccessDesc: 'Your simulation has been sent to the admins. Once approved, it will appear on the homepage right away!',
+    smEditTitle: 'Edit simulation',
     gsTitle: 'Manage & Sync Google Sheets',
     gsConfigured: 'Configured',
     gsNotConnected: 'Not connected',
@@ -640,6 +645,7 @@ export const translations: Record<Language, Translations> = {
     amNoPendingDesc: 'All community submissions are done!',
     amPendingHint: 'The posts below are contributed by users. Check the link and press Approve to show them publicly on the homepage or Reject.',
     amOpenLink: 'Open link',
+    amEdit: 'Edit',
     amApprovedHint: 'The list of approved websites is public on the homepage. You can delete any post with a safe confirmation flow.',
     amOpenWebsite: 'Open website',
     amDeleteWebsite: 'Confirm delete website',
@@ -826,6 +832,7 @@ export const translations: Record<Language, Translations> = {
     smUploadImage: 'อัปโหลดรูปภาพ',
     smMockupTitle: 'ชื่อเว็บไซต์ของคุณ',
     smSuccessDesc: 'แบบจำลองของคุณถูกส่งถึงผู้ดูแลแล้ว เมื่อผ่านการอนุมัติ จะแสดงบนหน้าหลักทันที!',
+    smEditTitle: 'แก้ไขแบบจำลอง',
     gsTitle: 'จัดการและซิงค์ Google Sheets',
     gsConfigured: 'ตั้งค่าแล้ว',
     gsNotConnected: 'ยังไม่ได้เชื่อมต่อ',
@@ -888,6 +895,7 @@ export const translations: Record<Language, Translations> = {
     amNoPendingDesc: 'ข้อเสนอจากชุมชนทั้งหมดจัดการเสร็จแล้ว!',
     amPendingHint: 'โพสต์ด้านล่างมาจากผู้ใช้ ตรวจสอบลิงก์แล้วกด อนุมัติ เพื่อแสดงต่อสาธารณะบนหน้าหลัก หรือกด ปฏิเสธ',
     amOpenLink: 'เปิดลิงก์',
+    amEdit: 'แก้ไข',
     amApprovedHint: 'รายการเว็บไซต์ที่อนุมัติแล้วแสดงสาธารณะบนหน้าหลัก คุณสามารถลบโพสต์ใดก็ได้ด้วยกระบวนการยืนยันที่ปลอดภัย',
     amOpenWebsite: 'เปิดเว็บไซต์',
     amDeleteWebsite: 'ยืนยันการลบเว็บไซต์',
@@ -1074,6 +1082,7 @@ export const translations: Record<Language, Translations> = {
     smUploadImage: 'ပုံ တင်ရန်',
     smMockupTitle: 'သင့်ဝက်ဆိုက်၏ ခေါင်းစဉ်',
     smSuccessDesc: 'သင့် simulation ကို အက်မင်ထံ ပို့ပြီးပါပြီ။ အတည်ပြုပြီးသည်နှင့် မူရင်းစာမျက်နှာတွင် ချက်ချင်းပြသပါမည်!',
+    smEditTitle: 'simulation ကို တည်းဖြတ်ရန်',
     gsTitle: 'Google Sheets စီမံခန့်ခွဲခြင်းနှင့် ထပ်တူပြုခြင်း',
     gsConfigured: 'ပြင်ဆင်ပြီးပါပြီ',
     gsNotConnected: 'မချိတ်ဆက်ရသေးပါ',
@@ -1136,6 +1145,7 @@ export const translations: Record<Language, Translations> = {
     amNoPendingDesc: 'ရပ်ရွာမှ အကြံပြုချက်အားလုံး ဆောင်ရွက်ပြီးပါပြီ!',
     amPendingHint: 'အောက်ဖော်ပြပါ ပို့စ်များသည် အသုံးပြုသူများ ပံ့ပိုးထားခြင်းဖြစ်သည်။ link ကိုစစ်ဆေးပြီး မူရင်းစာမျက်နှာတွင် လူသိရှင်ကြားပြသရန် အတည်ပြုပါ သို့မဟုတ် ငြင်းပယ်ရန် နှိပ်ပါ။',
     amOpenLink: 'လင့်ခ် ဖွင့်ပါ',
+    amEdit: 'တည်းဖြတ်',
     amApprovedHint: 'အတည်ပြုထားသော ဝက်ဆိုက်စာရင်းသည် မူရင်းစာမျက်နှာတွင် လူသိရှင်ကြား ဖြစ်သည်။ လုံခြုံသော အတည်ပြုမှုဖြင့် မည်သည့်ပို့စ်ကိုမဆို ဖျက်နိုင်သည်။',
     amOpenWebsite: 'ဝက်ဆိုက် ဖွင့်ပါ',
     amDeleteWebsite: 'ဝက်ဆိုက် ဖျက်ခြင်းကို အတည်ပြုပါ',
@@ -1322,6 +1332,7 @@ export const translations: Record<Language, Translations> = {
     smUploadImage: 'ອັບໂຫຼດຮູບ',
     smMockupTitle: 'ຫົວຂໍ້ເວັບໄຊທ໌ຂອງທ່ານ',
     smSuccessDesc: 'simulation ຂອງທ່ານຖືກສົ່ງຫາຜູ້ບໍລິຫານແລ້ວ. ເມື່ອໄດ້ຮັບອະນຸມັດ ຈະສະແດງໃນໜ້າຫຼັກທັນທີ!',
+    smEditTitle: 'ແກ້ໄຂ simulation',
     gsTitle: 'ຈັດການ ແລະ ຊິງຄ໌ Google Sheets',
     gsConfigured: 'ຕັ້ງຄ່າແລ້ວ',
     gsNotConnected: 'ຍັງບໍ່ໄດ້ເຊື່ອມຕໍ່',
@@ -1384,6 +1395,7 @@ export const translations: Record<Language, Translations> = {
     amNoPendingDesc: 'ຂໍ້ສະເໜີຈາກຊຸມຊົນທັງໝົດຈັດການແລ້ວ!',
     amPendingHint: 'ໂພສດ້ານລຸ່ມມາຈາກຜູ້ໃຊ້. ກວດເບິ່ງລິ້ງແລ້ວກົດ ອະນຸມັດ ເພື່ອສະແດງຕໍ່ສາທາລະນະໃນໜ້າຫຼັກ ຫຼື ປະຕິເສດ.',
     amOpenLink: 'ເປີດລິ້ງ',
+    amEdit: 'ແກ້ໄຂ',
     amApprovedHint: 'ລາຍຊື່ເວັບໄຊທ໌ທີ່ຜ່ານອະນຸມັດແມ່ນສາທາລະນະຢູ່ໜ້າຫຼັກ. ທ່ານສາມາດລຶບໂພສອັນໃດກໍໄດ້ຜ່ານການຢືນຢັນທີ່ປອດໄພ.',
     amOpenWebsite: 'ເປີດເວັບໄຊທ໌',
     amDeleteWebsite: 'ຢືນຢັນການລຶບເວັບໄຊທ໌',
@@ -1570,6 +1582,7 @@ export const translations: Record<Language, Translations> = {
     smUploadImage: 'ផ្ទុក​រូបភាព',
     smMockupTitle: 'ចំណង​ជើង​វេបសាយ​របស់​អ្នក',
     smSuccessDesc: 'simulation របស់​អ្នក​ត្រូវ​បាន​ផ្ញើ​ទៅ​អ្នក​គ្រប់គ្រង​ហើយ។ បន្ទាប់​ពី​អនុម័ត វា​នឹង​បង្ហាញ​លើ​ទំព័រ​ដើម​ភ្លាម!',
+    smEditTitle: 'កែ​សម្រួល​ simulation',
     gsTitle: 'គ្រប់គ្រង និង​ធ្វើ​សមកាលកម្ម Google Sheets',
     gsConfigured: 'បាន​កំណត់​រួច',
     gsNotConnected: 'មិន​ទាន់​ភ្ជាប់',
@@ -1632,6 +1645,7 @@ export const translations: Record<Language, Translations> = {
     amNoPendingDesc: 'រាល់​សំណូម​ពរ​ពី​សហគមន៍​ត្រូវ​បាន​ដោះស្រាយ​រួច​រាល់!',
     amPendingHint: 'ប្រកាស​ខាង​ក្រោម​ជា​ការ​រួមចំណែក​ពី​អ្នក​ប្រើ។ ពិនិត្យ​តំណ រួច​ចុច អនុម័ត ដើម្បី​បង្ហាញ​ជា​សាធារណៈ​លើ​ទំព័រ​ដើម ឬ​ បដិសេធ។',
     amOpenLink: 'បើក​តំណ',
+    amEdit: 'កែសម្រួល',
     amApprovedHint: 'បញ្ជី​វេបសាយ​ដែល​បាន​អនុម័ត​គឺ​សាធារណៈ​នៅ​លើ​ទំព័រ​ដើម។ អ្នក​អាច​លុប​ប្រកាស​ណា​មួយ​បាន​ជាមួយ​លំហូរ​ការ​បញ្ជាក់​ដោយ​សុវត្ថិភាព។',
     amOpenWebsite: 'បើក​វេបសាយ',
     amDeleteWebsite: 'បញ្ជាក់​ការ​លុប​វេបសាយ',
@@ -1818,6 +1832,7 @@ export const translations: Record<Language, Translations> = {
     smUploadImage: 'Unggah gambar',
     smMockupTitle: 'Judul situs web Anda',
     smSuccessDesc: 'Simulasi Anda telah dikirim ke admin. Setelah disetujui, akan tampil langsung di beranda!',
+    smEditTitle: 'Edit simulasi',
     gsTitle: 'Kelola & Sinkronkan Google Sheets',
     gsConfigured: 'Terkonfigurasi',
     gsNotConnected: 'Belum terhubung',
@@ -1880,6 +1895,7 @@ export const translations: Record<Language, Translations> = {
     amNoPendingDesc: 'Semua pengajuan komunitas telah selesai!',
     amPendingHint: 'Postingan di bawah ini dikontribusikan oleh pengguna. Periksa tautan lalu tekan Setujui untuk menampilkan publik di beranda atau Tolak.',
     amOpenLink: 'Buka tautan',
+    amEdit: 'Edit',
     amApprovedHint: 'Daftar situs web yang disetujui bersifat publik di beranda. Anda dapat menghapus postingan apa pun dengan alur konfirmasi yang aman.',
     amOpenWebsite: 'Buka situs web',
     amDeleteWebsite: 'Konfirmasi hapus situs web',
@@ -2066,6 +2082,7 @@ export const translations: Record<Language, Translations> = {
     smUploadImage: 'Muat naik imej',
     smMockupTitle: 'Tajuk laman web anda',
     smSuccessDesc: 'Simulasi anda telah dihantar kepada admin. Setelah diluluskan, ia akan muncul di laman utama dengan serta-merta!',
+    smEditTitle: 'Edit simulasi',
     gsTitle: 'Urus & Segerakkan Google Sheets',
     gsConfigured: 'Dikonfigurasi',
     gsNotConnected: 'Belum disambung',
@@ -2128,6 +2145,7 @@ export const translations: Record<Language, Translations> = {
     amNoPendingDesc: 'Semua cadangan komuniti telah selesai!',
     amPendingHint: 'Posting di bawah ini disumbangkan oleh pengguna. Periksa pautan lalu tekan Lulus untuk memaparkan awam di laman utama atau Tolak.',
     amOpenLink: 'Buka pautan',
+    amEdit: 'Sunting',
     amApprovedHint: 'Senarai laman web yang diluluskan adalah awam di laman utama. Anda boleh memadam mana-mana posting dengan aliran pengesahan yang selamat.',
     amOpenWebsite: 'Buka laman web',
     amDeleteWebsite: 'Sahkan padam laman web',
@@ -2314,6 +2332,7 @@ export const translations: Record<Language, Translations> = {
     smUploadImage: 'Mag-upload ng imahe',
     smMockupTitle: 'Pamagat ng iyong website',
     smSuccessDesc: 'Naipadala na ang iyong simulation sa admin. Kapag naaprubahan, lalabas ito kaagad sa homepage!',
+    smEditTitle: 'I-edit ang simulation',
     gsTitle: 'Pamahalaan at I-sync ang Google Sheets',
     gsConfigured: 'Naka-configure',
     gsNotConnected: 'Hindi pa konektado',
@@ -2376,6 +2395,7 @@ export const translations: Record<Language, Translations> = {
     amNoPendingDesc: 'Tapos na ang lahat ng isinumite ng komunidad!',
     amPendingHint: 'Ang mga post sa ibaba ay kontribusyon ng mga user. Suriin ang link at pindutin ang Aprubahan para ipakita nang pampubliko sa homepage o Tanggihan.',
     amOpenLink: 'Buksan ang link',
+    amEdit: 'I-edit',
     amApprovedHint: 'Ang listahan ng mga naaprubahang website ay pampubliko sa homepage. Maaari mong tanggalin ang anumang post gamit ang ligtas na confirmation flow.',
     amOpenWebsite: 'Buksan ang website',
     amDeleteWebsite: 'Kumpirmahin ang pagtanggal ng website',
@@ -2562,6 +2582,7 @@ export const translations: Record<Language, Translations> = {
     smUploadImage: 'Upload imajen',
     smMockupTitle: 'Títulu website ita-nian',
     smSuccessDesc: 'Ita-nia simulation haruka ona ba admin. Depois de aprovadu, sei hatudu iha pájina prinsipál kedas!',
+    smEditTitle: 'Edita simulation',
     gsTitle: 'Jestão & Sinkroniza Google Sheets',
     gsConfigured: 'Konfiguradu ona',
     gsNotConnected: 'Seidauk konekta',
@@ -2624,6 +2645,7 @@ export const translations: Record<Language, Translations> = {
     amNoPendingDesc: 'Sasán hotu husi komunidade konkluí ona!',
     amPendingHint: 'Post sira iha kraik nee husi uzuáriu. Verifika ligasaun depois klik Aprova atu hatudu públiku iha pájina prinsipál ka Rejeita.',
     amOpenLink: 'Loke ligasaun',
+    amEdit: 'Edita',
     amApprovedHint: 'Lista website aprovadu sira públiku iha pájina prinsipál. Ita bele hamoos post ida ida ho konfirmasaun nebee seguru.',
     amOpenWebsite: 'Loke website',
     amDeleteWebsite: 'Konfirma hamoos website',

@@ -105,12 +105,35 @@ export function cleanScriptUrl(rawUrl: string): string {
 }
 
 /**
+ * Kiểm tra URL có phải bản thử nghiệm /dev hay không.
+ * Bản /dev chỉ chạy được trong chính trình duyệt của tài khoản chủ sở hữu
+ * (Google trả về trang đăng nhập không có header CORS) nên trình duyệt
+ * người dùng web sẽ luôn báo "Failed to fetch".
+ */
+export function isDevScriptUrl(url: string): boolean {
+  // đường dẫn: .../macros/s/XXXX/dev hoặc kết thúc bằng /dev
+  return /\/macros\/s\/[A-Za-z0-9\-_]+\/dev$/.test(url.trim());
+}
+
+function devUrlError(): SyncResult {
+  return {
+    success: false,
+    message:
+      'URL đang là bản thử nghiệm (…/dev), chỉ chạy trong trình duyệt của chính bạn. Hãy dùng URL bản production (…/exec) lấy từ Apps Script → Deploy → Manage deployments.',
+  };
+}
+
+/**
  * Fetch projects from Google Apps Script Web App
  */
 export async function fetchProjectsFromSheet(scriptUrl: string): Promise<SyncResult> {
   const url = cleanScriptUrl(scriptUrl);
   if (!url) {
     return { success: false, message: 'Chưa cấu hình đường dẫn Google Apps Script.' };
+  }
+
+  if (isDevScriptUrl(url)) {
+    return devUrlError();
   }
 
   // If user passed a spreadsheet URL directly rather than web app
@@ -212,6 +235,10 @@ export async function pushProjectsToSheet(scriptUrl: string, projects: WebProjec
   const url = cleanScriptUrl(scriptUrl);
   if (!url) {
     return { success: false, message: 'Chưa cấu hình đường dẫn Google Apps Script.' };
+  }
+
+  if (isDevScriptUrl(url)) {
+    return devUrlError();
   }
 
   if (url.includes('docs.google.com/spreadsheets')) {
@@ -339,6 +366,10 @@ export async function fetchSubmissionsFromSheet(scriptUrl: string): Promise<Sync
   const url = cleanScriptUrl(scriptUrl);
   if (!url || url.includes('docs.google.com/spreadsheets')) {
     return { success: false, message: 'Đây là đường dẫn Google Sheets trực tiếp. Vui lòng dùng Web App URL.' };
+  }
+
+  if (isDevScriptUrl(url)) {
+    return devUrlError();
   }
 
   try {

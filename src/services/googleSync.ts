@@ -412,7 +412,8 @@ export async function fetchSubmissionsFromSheet(scriptUrl: string): Promise<Sync
 }
 
 /**
- * Delete submission(s) from the dedicated submissions tab (admin add/delete management)
+ * Delete project(s) from Google Sheets (cả WebHub_Submissions lẫn WebHub_Projects)
+ * - admin xóa bài: bài đã xóa sẽ không còn ở sheet nên không quay lại khi tải lại.
  */
 export async function deleteSubmissionsFromSheet(scriptUrl: string, projectIds: string[]): Promise<void> {
   const url = cleanScriptUrl(scriptUrl);
@@ -718,11 +719,18 @@ function doPost(e) {
       return createJsonResponse({ status: "error", message: "Không tìm thấy bài viết trong WebHub_Projects" });
     }
 
-    // 6. Xóa dự án khỏi SUBMISSION_SHEET (admin quản lý THÊM - XÓA trên bảng tính)
+    // 6. Xóa dự án khỏi Google Sheets (admin bấm Xóa trên website).
+    //    Xóa ở CẢ HAI tab: WebHub_Submissions (chưa duyệt) và WebHub_Projects (đã duyệt)
+    //    để bài đã xóa không quay lại khi tải dữ liệu từ Sheets hoặc duyệt từ xa.
     if (payload.action === "deleteProject") {
       const ids = Array.isArray(payload.ids) ? payload.ids : [payload.projectId];
-      const removed = deleteRowsById(ensureSheet(SUBMISSION_SHEET), ids);
-      return createJsonResponse({ status: "success", message: "Đã xóa " + removed.length + " dự án khỏi tab WebHub_Submissions", removed: removed.length });
+      const removedSub = deleteRowsById(ensureSheet(SUBMISSION_SHEET), ids);
+      const removedMain = deleteRowsById(ensureSheet(MAIN_SHEET), ids);
+      return createJsonResponse({
+        status: "success",
+        message: "Đã xóa " + (removedSub.length + removedMain.length) + " dự án khỏi Google Sheets",
+        removed: removedSub.length + removedMain.length
+      });
     }
 
     return createJsonResponse({ status: "ignored", message: "Không có hành động phù hợp" });

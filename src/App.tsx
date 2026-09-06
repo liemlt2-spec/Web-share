@@ -32,6 +32,7 @@ import {
   pushSingleProjectToSheet,
   upsertProjectToSheet,
   fetchProjectsFromSheet,
+  deleteSubmissionsFromSheet,
 } from './services/googleSync';
 import { getWebsiteScreenshotUrl } from './utils/screenshot';
 
@@ -276,6 +277,13 @@ export default function App() {
 
   const handleConfirmDelete = (id: string) => {
     setProjects((prev) => prev.filter((p) => p.id !== id));
+
+    // Đồng bộ xóa lên Google Sheets (cả tab đã duyệt lẫn chờ duyệt)
+    // để bài đã xóa không quay lại khi tải dữ liệu từ Sheets / duyệt từ xa.
+    const scriptUrl = getStoredScriptUrl();
+    if (scriptUrl && isAutoSyncEnabled()) {
+      deleteSubmissionsFromSheet(scriptUrl, [id]);
+    }
   };
 
   const handleUpdateProject = (updated: WebProject) => {
